@@ -28,3 +28,24 @@ export const updateCharacterHP = async (characterId, newCurrentHP) => {
     throw new Error(`Gagal update HP: ${error.message}`);
   }
 };
+
+// Update Stat Karakter (Bisa untuk HP atau AC)
+export const updateCharacterStat = async (characterId, statPath, newValue) => {
+  try {
+    // statPath contohnya: 'combat/hpCurrent' atau 'combat/ac'
+    const statRef = ref(db, `party/${characterId}/${statPath}`);
+    await set(statRef, newValue);
+  } catch (error) {
+    throw new Error(`Gagal update stat: ${error.message}`);
+  }
+};
+
+// Hapus Karakter dari Party
+export const removeCharacter = async (characterId) => {
+  try {
+    const characterRef = ref(db, `party/${characterId}`);
+    await remove(characterRef);
+  } catch (error) {
+    throw new Error(`Gagal menghapus karakter: ${error.message}`);
+  }
+};
