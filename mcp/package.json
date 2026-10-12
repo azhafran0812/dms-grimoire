@@ -1,0 +1,26 @@
+{
+  "name": "dms-grimoire-mcp",
+  "version": "2.0.0",
+  "description": "DM's Grimoire D&D Campaign Manager & AI Assistant — MCP Server (Micro Arch Layer)",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "mcp": "node src/index.js mcp",
+    "lint": "biome lint src",
+    "format": "biome format --write src",
+    "check": "biome check --write src",
+    "test": "node --test tests/**/*.test.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.6.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.15"
+  }
+}

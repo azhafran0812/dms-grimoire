@@ -1,0 +1,52 @@
+# ═══════════════════════════════════════════════════════
+# DM's Grimoire — Git Ignore Rules
+# ═══════════════════════════════════════════════════════
+
+# Private & Scratch Directories
+.uploads/
+.uploads
+.scratch/
+.scratch
+
+# Environment & Secret Configurations (DO NOT COMMIT)
+.env
+.env.*
+!.env.example
+*.env
+*.env.*
+*.pem
+*.key
+*.cert
+*.crt
+id_rsa*
+secrets.*
+
+# Node.js Dependencies & Logs
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs/
+*.log
+
+# Build & Runtime
+dist/
+dist-ssr/
+build/
+*.local
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Cached Data
+data/items_cache.json
+mcp/data/items_cache.json

@@ -1,0 +1,9 @@
+# MCP Server Local Ignore
+.env
+.env.*
+!.env.example
+node_modules/
+data/items_cache.json
+logs/
+*.log
+.DS_Store
