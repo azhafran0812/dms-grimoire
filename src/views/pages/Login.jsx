@@ -1,54 +1,27 @@
 import { useState } from 'react';
-import { auth, db } from '../firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { ref, get } from 'firebase/database';
 import { useNavigate, Link } from 'react-router-dom';
+import { loginUser } from '../../controllers/authController'; // Import Controller
 import { Book } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
-
     try {
-      // 1. Sign in ke Firebase Auth
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-
-      // 2. Cek apakah email sudah diverifikasi (Syarat Webmailer)
-      if (!user.emailVerified) {
-        setError('Email belum diverifikasi. Silakan cek kotak masuk Anda.');
-        setLoading(false);
-        return; // Hentikan proses login jika belum diverifikasi
-      }
-
-      // 3. Ambil data Role dari Realtime Database
-      const userRef = ref(db, 'users/' + user.uid);
-      const snapshot = await get(userRef);
-
-      if (snapshot.exists()) {
-        const userData = snapshot.val();
-        
-        // 4. Arahkan ke dasbor yang sesuai berdasarkan Role
-        if (userData.role === 'dm') {
-          navigate('/dashboard/dm');
-        } else {
-          navigate('/dashboard/player');
-        }
+      
+      const userData = await loginUser(email, password);
+      
+      if (userData.role === 'dm') {
+        navigate('/dashboard/dm');
       } else {
-        setError('Data user tidak ditemukan di database.');
+        navigate('/dashboard/player');
       }
     } catch (err) {
-      setError('Email atau Password salah.');
-    } finally {
-      setLoading(false);
+      setError(err.message);
     }
   };
 

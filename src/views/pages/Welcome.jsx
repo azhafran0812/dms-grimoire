@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Book, ArrowLeft } from 'lucide-react';
-import { auth, db } from '../firebase'; 
+import { auth, db } from '../../firebase'; 
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { ref, set } from 'firebase/database';
 import { Link } from 'react-router-dom';
 
 export default function Welcome() {
   const [showModal, setShowModal] = useState(false);
-  const [selectedRole, setSelectedRole] = useState(null); // null, 'dm', atau 'player'
+  const [selectedRole, setSelectedRole] = useState(null); 
   
   // State untuk form registrasi
   const [email, setEmail] = useState('');

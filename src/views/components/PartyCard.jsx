@@ -1,5 +1,5 @@
 import { ref, update } from 'firebase/database';
-import { db } from '../firebase';
+import { db } from '../../firebase';
 import { Shield } from 'lucide-react';
 
 export default function PartyCard({ id, character }) {

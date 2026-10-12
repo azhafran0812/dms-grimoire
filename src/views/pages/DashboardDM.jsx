@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Bell, Plus, ChevronDown, ChevronRight, ArrowRight, CheckSquare, Square, MapPin } from 'lucide-react';
 import { ref, onValue } from 'firebase/database';
-import { db } from '../firebase';
+import { db } from '../../firebase';
 import Sidebar from '../components/Sidebar';
 import PartyCard from '../components/PartyCard';
 import ArcaneScribeModal from '../components/ArcaneScribeModal';
