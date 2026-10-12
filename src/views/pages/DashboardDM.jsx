@@ -5,9 +5,11 @@ import { db } from '../../firebase';
 import Sidebar from '../components/Sidebar';
 import PartyCard from '../components/PartyCard';
 import ArcaneScribeModal from '../components/ArcaneScribeModal';
+import AddCharacterModal from '../components/AddCharacterModal';
 
 export default function DashboardDM() {
   const [isScribeOpen, setIsScribeOpen] = useState(false);
+  const [isAddCharacterOpen, setIsAddCharacterOpen] = useState(false);
   const [partyMembers, setPartyMembers] = useState({});
   const [loadingParty, setLoadingParty] = useState(true);
   
@@ -46,7 +48,10 @@ export default function DashboardDM() {
           {/* --- PARTY STATUS SECTION --- */}
           <div className="flex justify-between items-end mb-4 border-b border-parchment-dark pb-2">
             <h3 className="font-serif text-xl tracking-wide uppercase">Party Status</h3>
-            <button className="text-sm text-gray-500 hover:text-grimoire-dark flex items-center gap-1 transition-colors">
+            <button 
+              onClick={() => setIsAddCharacterOpen(true)}
+              className="text-sm text-gray-500 hover:text-grimoire-dark flex items-center gap-1 transition-colors"
+            >
               Manage party <ChevronRight className="w-4 h-4" />
             </button>
           </div>
@@ -158,6 +163,10 @@ export default function DashboardDM() {
         isOpen={isScribeOpen} 
         onClose={() => setIsScribeOpen(false)} 
         campaignName="The Ashen Crown" 
+      />
+      <AddCharacterModal 
+        isOpen={isAddCharacterOpen} 
+        onClose={() => setIsAddCharacterOpen(false)} 
       />
     </div>
   );
