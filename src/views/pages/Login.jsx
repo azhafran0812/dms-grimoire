@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { loginUser } from '../../controllers/authController'; // Import Controller
+import { loginUser } from '../../controllers/authController';
 import { Book } from 'lucide-react';
 
 export default function Login() {
@@ -9,21 +9,26 @@ export default function Login() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  const [loading, setLoading] = useState(false); 
+
   const handleLogin = async (e) => {
     e.preventDefault();
-    try {
-      
-      const userData = await loginUser(email, password);
-      
-      if (userData.role === 'dm') {
-        navigate('/dashboard/dm');
-      } else {
-        navigate('/dashboard/player');
-      }
-    } catch (err) {
-      setError(err.message);
+    setLoading(true); 
+    setError('');    
+  
+  try {
+    const userData = await loginUser(email, password);
+    if (userData.role === 'dm') {
+      navigate('/dashboard/dm');
+    } else {
+      navigate('/dashboard/player');
     }
-  };
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false); 
+  }
+};
 
   return (
     <div className="min-h-screen bg-grimoire-dark flex items-center justify-center p-4">
