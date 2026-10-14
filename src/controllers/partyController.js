@@ -49,3 +49,12 @@ export const removeCharacter = async (characterId) => {
     throw new Error(`Gagal menghapus karakter: ${error.message}`);
   }
 };
+
+export const updateFullCharacter = async (characterId, updatedData) => {
+  try {
+    const characterRef = ref(db, `party/${characterId}`);
+    await update(characterRef, updatedData);
+  } catch (error) {
+    throw new Error(`Gagal update karakter: ${error.message}`);
+  }
+};
