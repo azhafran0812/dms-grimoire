@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+@theme {
+  /* Konfigurasi Warna */
+  --color-parchment-light: #F8F5E9;
+  --color-parchment: #EFEBE0;
+  --color-parchment-dark: #E0D9C8;
+
+  --color-grimoire-dark: #151718;
+  --color-grimoire-light: #24272A;
+  --color-grimoire-gold: #C5A880;
+
+  /* Konfigurasi Font */
+  --font-serif: "Cinzel", serif;
+  --font-sans: "Inter", sans-serif;
+}
