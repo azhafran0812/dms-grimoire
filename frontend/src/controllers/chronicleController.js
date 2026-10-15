@@ -1,31 +1,33 @@
+import { ref, push, set, remove } from 'firebase/database';
 import { db } from '../firebase';
-import { ref, set, remove, push } from 'firebase/database';
 
-const chroniclePath = 'chronicles';
-
-// Tambah riwayat cerita baru
-export const addChronicle = async (sessionNumber, title, description) => {
+// Tambah cerita baru ke kampanye yang spesifik
+export const addChronicle = async (campaignId, chronicleData) => {
+  if (!campaignId) return;
   try {
-    const chronicleRef = ref(db, chroniclePath);
-    const newEntryRef = push(chronicleRef); 
+    const chronRef = ref(db, `campaigns/${campaignId}/chronicles`);
+    const newEntryRef = push(chronRef);
     await set(newEntryRef, {
       id: newEntryRef.key,
-      sessionNumber: parseInt(sessionNumber),
-      title,
-      description,
+      title: chronicleData.title,
+      sessionNumber: chronicleData.sessionNumber,
+      description: chronicleData.description,
       createdAt: Date.now()
     });
   } catch (error) {
-    throw new Error(`Gagal menambah cerita: ${error.message}`);
+    console.error("Error adding chronicle: ", error);
+    throw error;
   }
 };
 
-// Hapus riwayat cerita
-export const deleteChronicle = async (id) => {
+// Hapus cerita dari kampanye yang spesifik
+export const deleteChronicle = async (campaignId, id) => {
+  if (!campaignId || !id) return;
   try {
-    const entryRef = ref(db, `${chroniclePath}/${id}`);
-    await remove(entryRef);
+    const chronRef = ref(db, `campaigns/${campaignId}/chronicles/${id}`);
+    await remove(chronRef);
   } catch (error) {
-    throw new Error(`Gagal menghapus cerita: ${error.message}`);
+    console.error("Error deleting chronicle: ", error);
+    throw error;
   }
 };

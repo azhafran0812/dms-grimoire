@@ -2,21 +2,19 @@ import { useState, useEffect } from 'react';
 import { X, UserCog } from 'lucide-react';
 import { updateFullCharacter } from '../../controllers/partyController';
 
-export default function EditCharacterModal({ isOpen, onClose, characterData }) {
+// TAMBAHKAN activeCampaignId di props
+export default function EditCharacterModal({ isOpen, onClose, characterData, activeCampaignId }) {
   const [formData, setFormData] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Sinkronisasi data saat modal dibuka
   useEffect(() => {
     if (characterData && isOpen) {
-      // Deep copy agar tidak mengubah state asli sebelum disave
       setFormData(JSON.parse(JSON.stringify(characterData)));
     }
   }, [characterData, isOpen]);
 
   if (!isOpen || !formData) return null;
 
-  // Fungsi helper untuk handle perubahan input nested (seperti stats.str atau combat.hpCurrent)
   const handleChange = (category, field, value) => {
     setFormData(prev => {
       if (category) {
@@ -28,9 +26,12 @@ export default function EditCharacterModal({ isOpen, onClose, characterData }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!activeCampaignId) return;
+
     setLoading(true);
     try {
-      await updateFullCharacter(characterData.id, formData);
+      // KIRIM activeCampaignId KE CONTROLLER
+      await updateFullCharacter(activeCampaignId, characterData.id, formData);
       onClose();
     } catch (error) {
       console.error(error);
@@ -56,7 +57,6 @@ export default function EditCharacterModal({ isOpen, onClose, characterData }) {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-8">
-          
           {/* BAGIAN 1: Basic Info */}
           <div>
             <h3 className="text-sm font-bold text-grimoire-gold tracking-widest uppercase mb-4 border-b border-parchment-dark pb-2">Basic Info</h3>

@@ -1,60 +1,36 @@
-// src/controllers/partyController.js
+import { ref, push, set, update, remove } from 'firebase/database';
 import { db } from '../firebase';
-import { ref, set, update, remove } from 'firebase/database';
-import { createCharacterPayload } from '../models/characterModel';
 
-// Tambah Karakter Baru
-export const addCharacter = async (characterInput) => {
+// Tambah karakter ke campaign spesifik
+export const addCharacter = async (campaignId, characterData) => {
+  if (!campaignId) throw new Error("Pilih kampanye terlebih dahulu.");
   try {
-    // Gunakan Model untuk membentuk data komprehensif
-    const newCharacter = createCharacterPayload(characterInput);
+    const partyRef = ref(db, `campaigns/${campaignId}/party`);
+    const newCharRef = push(partyRef);
     
-    // Simpan ke Firebase di path: party/{characterId}
-    const characterRef = ref(db, `party/${newCharacter.id}`);
-    await set(characterRef, newCharacter);
-    
-    return newCharacter;
+    await set(newCharRef, {
+      id: newCharRef.key,
+      ...characterData,
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    });
   } catch (error) {
-    throw new Error(`Gagal menambahkan karakter: ${error.message}`);
+    console.error("Error adding character: ", error);
+    throw error;
   }
 };
 
-// Update HP Karakter (Contoh fungsi untuk Live HP)
-export const updateCharacterHP = async (characterId, newCurrentHP) => {
+// Update karakter di campaign spesifik
+export const updateFullCharacter = async (campaignId, characterId, characterData) => {
+  if (!campaignId || !characterId) return;
   try {
-    const hpRef = ref(db, `party/${characterId}/combat`);
-    await update(hpRef, { hpCurrent: newCurrentHP });
+    const charRef = ref(db, `campaigns/${campaignId}/party/${characterId}`);
+    await update(charRef, {
+      ...characterData,
+      updatedAt: Date.now()
+    });
   } catch (error) {
-    throw new Error(`Gagal update HP: ${error.message}`);
-  }
-};
-
-// Update Stat Karakter (Bisa untuk HP atau AC)
-export const updateCharacterStat = async (characterId, statPath, newValue) => {
-  try {
-    // statPath contohnya: 'combat/hpCurrent' atau 'combat/ac'
-    const statRef = ref(db, `party/${characterId}/${statPath}`);
-    await set(statRef, newValue);
-  } catch (error) {
-    throw new Error(`Gagal update stat: ${error.message}`);
-  }
-};
-
-// Hapus Karakter dari Party
-export const removeCharacter = async (characterId) => {
-  try {
-    const characterRef = ref(db, `party/${characterId}`);
-    await remove(characterRef);
-  } catch (error) {
-    throw new Error(`Gagal menghapus karakter: ${error.message}`);
-  }
-};
-
-export const updateFullCharacter = async (characterId, updatedData) => {
-  try {
-    const characterRef = ref(db, `party/${characterId}`);
-    await update(characterRef, updatedData);
-  } catch (error) {
-    throw new Error(`Gagal update karakter: ${error.message}`);
+    console.error("Error updating character: ", error);
+    throw error;
   }
 };

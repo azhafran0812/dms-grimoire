@@ -1,28 +1,50 @@
 import { useState, useEffect } from 'react';
-import { Users, Shield, Heart, Zap, Edit3, Activity } from 'lucide-react';
-import { ref, onValue } from 'firebase/database';
+import { Users, Shield, Heart, Zap, Edit3, Activity, Trash2 } from 'lucide-react';
+import { ref, onValue, remove } from 'firebase/database';
 import { db } from '../../../firebase';
 import EditCharacterModal from '../EditCharacterModal';
 
-// Fungsi bantuan untuk menghitung modifier D&D (misal: Stat 16 -> +3)
+// Fungsi bantuan untuk menghitung modifier D&D
 const getModifier = (score) => {
   const mod = Math.floor((score - 10) / 2);
   return mod >= 0 ? `+${mod}` : mod;
 };
 
-export default function PartyView() {
+// TERIMA PROPS activeCampaignId
+export default function PartyView({ activeCampaignId }) {
   const [partyMembers, setPartyMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedCharacter, setSelectedCharacter] = useState(null);
 
   const handleEditClick = (character) => {
-  setSelectedCharacter(character);
-  setIsEditModalOpen(true);
-};   
+    setSelectedCharacter(character);
+    setIsEditModalOpen(true);
+  };   
+
+  // FUNGSI DELETE
+  const handleDeleteClick = async (characterId, characterName) => {
+    if (!activeCampaignId) return;
+    if (window.confirm(`Keluarkan ${characterName} dari party ini?`)) {
+      try {
+        const charRef = ref(db, `campaigns/${activeCampaignId}/party/${characterId}`);
+        await remove(charRef);
+      } catch (error) {
+        console.error("Gagal menghapus karakter:", error);
+        alert("Gagal menghapus karakter.");
+      }
+    }
+  };
 
   useEffect(() => {
-    const partyRef = ref(db, 'party');
+    if (!activeCampaignId) {
+      setPartyMembers([]);
+      setLoading(false);
+      return;
+    }
+
+    // PATH DINAMIS SESUAI CAMPAIGN
+    const partyRef = ref(db, `campaigns/${activeCampaignId}/party`);
     const unsubParty = onValue(partyRef, (snapshot) => {
       if (snapshot.exists()) {
         const membersArray = Object.values(snapshot.val());
@@ -34,7 +56,7 @@ export default function PartyView() {
     });
 
     return () => unsubParty();
-  }, []);
+  }, [activeCampaignId]);
 
   return (
     <div className="animate-fade-in">
@@ -67,12 +89,23 @@ export default function PartyView() {
                     </p>
                   </div>
                 </div>
-                <button 
-                onClick={() => handleEditClick(char)}
-                className="text-gray-400 hover:text-grimoire-gold transition-colors flex items-center gap-2 text-sm font-bold uppercase tracking-wider"
-                >
-                <Edit3 className="w-4 h-4" /> Edit
-                </button>
+                
+                {/* ACTION BUTTONS */}
+                <div className="flex items-center gap-3">
+                  <button 
+                    onClick={() => handleEditClick(char)}
+                    className="text-gray-400 hover:text-grimoire-gold transition-colors flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider"
+                  >
+                    <Edit3 className="w-4 h-4" /> Edit
+                  </button>
+                  <button 
+                    onClick={() => handleDeleteClick(char.id, char.name)}
+                    className="text-gray-400 hover:text-red-500 transition-colors flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider"
+                    title="Hapus Karakter"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
 
               {/* Card Body (Status & Attributes) */}
@@ -135,14 +168,16 @@ export default function PartyView() {
         <div className="bg-white border border-dashed border-gray-300 rounded-xl p-12 text-center">
           <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
           <h3 className="font-serif text-xl text-gray-400 uppercase mb-2">No Party Members</h3>
-          <p className="text-sm text-gray-400">Return to the Overview to add characters to your party.</p>
+          <p className="text-sm text-gray-400">Pilih Campaign yang aktif atau tambahkan karakter baru dari Overview.</p>
         </div>
       )}
       
+      {/* KITA KIRIM activeCampaignId KE MODAL EDIT AGAR BISA MENYIMPAN KE PATH YANG BENAR */}
       <EditCharacterModal 
         isOpen={isEditModalOpen} 
         onClose={() => setIsEditModalOpen(false)} 
         characterData={selectedCharacter} 
+        activeCampaignId={activeCampaignId}
       />
     </div>
   );

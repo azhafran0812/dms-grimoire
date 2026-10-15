@@ -1,37 +1,46 @@
+import { ref, push, set, update, remove } from 'firebase/database';
 import { db } from '../firebase';
-import { ref, set, update, remove, push } from 'firebase/database';
 
-const prepPath = 'quickPrep';
-
-export const addPrepItem = async (text) => {
+// Tambah item prep ke kampanye spesifik
+export const addPrepItem = async (campaignId, text) => {
+  if (!campaignId || !text.trim()) return;
   try {
-    const prepRef = ref(db, prepPath);
+    const prepRef = ref(db, `campaigns/${campaignId}/quickPrep`);
     const newItemRef = push(prepRef);
     await set(newItemRef, {
       id: newItemRef.key,
-      text: text,
+      text: text.trim(),
       isCompleted: false,
       createdAt: Date.now()
     });
   } catch (error) {
-    throw new Error(`Gagal menambah prep item: ${error.message}`);
+    console.error("Error adding prep item: ", error);
+    throw error;
   }
 };
 
-export const togglePrepItem = async (itemId, currentStatus) => {
+// Toggle status selesai/belum selesai
+export const togglePrepItem = async (campaignId, itemId, currentStatus) => {
+  if (!campaignId || !itemId) return;
   try {
-    const itemRef = ref(db, `${prepPath}/${itemId}`);
-    await update(itemRef, { isCompleted: !currentStatus });
+    const itemRef = ref(db, `campaigns/${campaignId}/quickPrep/${itemId}`);
+    await update(itemRef, {
+      isCompleted: !currentStatus
+    });
   } catch (error) {
-    throw new Error(`Gagal update status: ${error.message}`);
+    console.error("Error toggling prep item: ", error);
+    throw error;
   }
 };
 
-export const deletePrepItem = async (itemId) => {
+// Hapus item prep
+export const deletePrepItem = async (campaignId, itemId) => {
+  if (!campaignId || !itemId) return;
   try {
-    const itemRef = ref(db, `${prepPath}/${itemId}`);
+    const itemRef = ref(db, `campaigns/${campaignId}/quickPrep/${itemId}`);
     await remove(itemRef);
   } catch (error) {
-    throw new Error(`Gagal menghapus item: ${error.message}`);
+    console.error("Error deleting prep item: ", error);
+    throw error;
   }
 };

@@ -1,5 +1,6 @@
 import { db } from '../firebase';
 import { ref, set, remove, push } from 'firebase/database';
+import { update } from 'firebase/database';
 
 const npcPath = 'campaign/active/npcs';
 
@@ -18,6 +19,20 @@ export const addNpc = async (npcData) => {
     });
   } catch (error) {
     throw new Error(`Gagal menambah NPC: ${error.message}`);
+  }
+};
+
+export const updateNpc = async (id, updatedData) => {
+  try {
+    const npcRef = ref(db, `campaign/active/npcs/${id}`);
+    await update(npcRef, {
+      ...updatedData,
+      updatedAt: Date.now()
+    });
+    console.log("NPC updated successfully");
+  } catch (error) {
+    console.error("Error updating NPC: ", error);
+    throw error;
   }
 };
 

@@ -1,121 +1,159 @@
 import { useState, useEffect } from 'react';
 import { Bell, Plus, ChevronDown, ChevronRight, ArrowRight, CheckSquare, Square, MapPin, Trash2 } from 'lucide-react';
 import { ref, onValue } from 'firebase/database';
-import { db } from '../../../firebase'; // Sesuaikan path import db jika perlu
+import { db } from '../../../firebase'; 
 import PartyCard from '../PartyCard';
+// SEMUA IMPORT CONTROLLER DIGABUNG JADI SATU DI SINI
+import { createNewCampaign, updateCampaignInfo, addChapterToCampaign } from '../../../controllers/campaignController';
 import { addPrepItem, togglePrepItem, deletePrepItem } from '../../../controllers/prepController';
 import { deleteChronicle } from '../../../controllers/chronicleController';
 
-export default function Overview({ onOpenAddCharacter, onOpenChronicleModal, onOpenCampaignModal }) {
-  // State untuk Data Firebase
-  const [partyMembers, setPartyMembers] = useState({});
-  const [loadingParty, setLoadingParty] = useState(true);
-  const [prepItems, setPrepItems] = useState([]);
-  const [newPrep, setNewPrep] = useState('');
-  const [chronicles, setChronicles] = useState([]);
-  const [campaignData, setCampaignData] = useState({
-    campaignName: 'The Ashen Crown',
-    chapterTitle: 'The Drowned Bell',
-    description: 'The party has reached the old abbey at last...',
-    progress: 68,
-    locationName: 'Blackwater Abbey',
-    locationDesc: 'Ruined sanctuary · The Greyfen'
-  });
-
-  // State untuk Dropdown Menu Top Bar
+export default function Overview({ activeCampaignId, setActiveCampaignId, setActiveView, onOpenAddCharacter, onOpenChronicleModal, onOpenCampaignModal }) {
+  // State untuk Dropdown List
+  const [campaignList, setCampaignList] = useState([]);
+  const [chapterList, setChapterList] = useState([]);
   const [showCampaignMenu, setShowCampaignMenu] = useState(false);
   const [showChapterMenu, setShowChapterMenu] = useState(false);
-  
-  // Data dummy untuk dropdown (Nantinya ditarik dari Firebase)
-  const availableCampaigns = ['The Ashen Crown', 'Curse of Strahd', 'Shadows of Waterdeep'];
-  const availableChapters = ['Session 18', 'Session 19', 'Session 20'];
 
-  // Mengambil data secara Real-time dari Firebase
+  // State untuk Data Firebase dari Campaign yang Aktif
+  const [partyMembers, setPartyMembers] = useState({});
+  const [prepItems, setPrepItems] = useState([]);
+  const [chronicles, setChronicles] = useState([]);
+  const [newPrep, setNewPrep] = useState('');
+  const [loadingParty, setLoadingParty] = useState(true);
+
+  // Nilai Default
+  const [campaignData, setCampaignData] = useState({
+    title: 'Untitled Campaign',
+    chapterTitle: 'Untitled Chapter',
+    system: '-',
+    status: 'Active',
+    description: 'Klik Create New Campaign untuk memulai.',
+    progress: 0,
+    currentLocation: 'Unknown',
+    locationDesc: ''
+  });
+
+  // 1. Ambil daftar semua kampanye untuk Dropdown Topbar
   useEffect(() => {
-    // Listener Party
-    const partyRef = ref(db, 'party');
-    const unsubParty = onValue(partyRef, (snapshot) => {
-      setPartyMembers(snapshot.exists() ? snapshot.val() : {});
+    const campaignsRef = ref(db, 'campaigns');
+    const unsub = onValue(campaignsRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const list = Object.keys(data).map(key => ({
+          id: key,
+          title: data[key].info?.title || 'Untitled Campaign',
+          chapterTitle: data[key].info?.chapterTitle || 'Untitled Chapter'
+        }));
+        setCampaignList(list);
+
+        // Auto-select kampanye pertama
+        if (!activeCampaignId && list.length > 0) {
+          setActiveCampaignId(list[0].id);
+        }
+      } else {
+        setCampaignList([]);
+        setActiveCampaignId(null);
+      }
+    });
+    return () => unsub();
+  }, [activeCampaignId, setActiveCampaignId]);
+
+  // 2. Ambil isi data dari Kampanye yang dipilih
+  useEffect(() => {
+    if (!activeCampaignId) {
+      setLoadingParty(false);
+      return; 
+    }
+
+    const infoRef = ref(db, `campaigns/${activeCampaignId}/info`);
+    const partyRef = ref(db, `campaigns/${activeCampaignId}/party`);
+    const prepRef = ref(db, `campaigns/${activeCampaignId}/quickPrep`);
+    const chronRef = ref(db, `campaigns/${activeCampaignId}/chronicles`);
+    const chapRef = ref(db, `campaigns/${activeCampaignId}/chapters`);
+
+    const unsubInfo = onValue(infoRef, (snap) => {
+      if (snap.exists()) setCampaignData(snap.val());
+    });
+
+    const unsubParty = onValue(partyRef, (snap) => {
+      setPartyMembers(snap.exists() ? snap.val() : {});
       setLoadingParty(false);
     });
 
-    // Listener Quick Prep
-    const prepRef = ref(db, 'quickPrep');
-    const unsubPrep = onValue(prepRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const itemsArray = Object.values(snapshot.val()).sort((a, b) => a.createdAt - b.createdAt);
-        setPrepItems(itemsArray);
+    const unsubPrep = onValue(prepRef, (snap) => {
+      if (snap.exists()) setPrepItems(Object.values(snap.val()).sort((a, b) => a.createdAt - b.createdAt));
+      else setPrepItems([]);
+    });
+
+    const unsubChron = onValue(chronRef, (snap) => {
+      if (snap.exists()) setChronicles(Object.values(snap.val()).sort((a, b) => a.createdAt - b.createdAt));
+      else setChronicles([]);
+    });
+
+    const unsubChap = onValue(chapRef, (snap) => {
+      if (snap.exists()) {
+        setChapterList(Object.values(snap.val()).sort((a, b) => a.createdAt - b.createdAt));
       } else {
-        setPrepItems([]);
+        setChapterList([]);
       }
     });
 
-    // Listener Chronicle
-    const chronicleRef = ref(db, 'chronicles');
-    const unsubChronicle = onValue(chronicleRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const chronArray = Object.values(snapshot.val()).sort((a, b) => b.createdAt - a.createdAt);
-        setChronicles(chronArray);
-      } else {
-        setChronicles([]);
-      }
-    });
+    return () => { unsubInfo(); unsubParty(); unsubPrep(); unsubChron(); unsubChap(); };
+  }, [activeCampaignId]);
 
-    // Listener Active Campaign Status
-    const campaignRef = ref(db, 'campaign/active');
-    const unsubCampaign = onValue(campaignRef, (snapshot) => {
-      if (snapshot.exists()) {
-        setCampaignData(snapshot.val());
-      }
-    });
+  const handleCreateCampaign = async () => {
+    const title = prompt("Masukkan nama Campaign Baru:");
+    if (title) {
+      const newId = await createNewCampaign(title);
+      setActiveCampaignId(newId); 
+      setShowCampaignMenu(false);
+    }
+  };
 
-    return () => {
-      unsubParty();
-      unsubPrep();
-      unsubChronicle();
-      unsubCampaign();
-    };
-  }, []);
+  const handleAddChapter = async () => {
+    if (!activeCampaignId) return;
+    const title = prompt("Masukkan nama Chapter / Sesi Baru (misal: Sesi 12 - Sarang Naga):");
+    if (title) {
+      await addChapterToCampaign(activeCampaignId, title);
+      await updateCampaignInfo(activeCampaignId, { chapterTitle: title });
+    }
+  };
 
   return (
     <div className="animate-fade-in">
       {/* --- TOP BAR NAVIGATION --- */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 pb-6 border-b border-parchment-dark gap-4">
-        
-        {/* Campaign & Session Selectors */}
         <div className="flex flex-wrap items-center gap-8">
           
           {/* Campaign Dropdown */}
           <div className="relative">
             <p className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mb-1">Campaign</p>
             <div 
-              onClick={() => {
-                setShowCampaignMenu(!showCampaignMenu);
-                setShowChapterMenu(false);
-              }}
+              onClick={() => { setShowCampaignMenu(!showCampaignMenu); setShowChapterMenu(false); }}
               className="flex items-center gap-2 text-grimoire-dark hover:text-grimoire-gold transition-colors cursor-pointer"
             >
               <span className="font-serif text-lg uppercase tracking-wide">
-                {campaignData.campaignName || 'The Ashen Crown'}
+                {activeCampaignId ? campaignData.title : 'Untitled Campaign'}
               </span>
               <ChevronDown className={`w-4 h-4 transition-transform ${showCampaignMenu ? 'rotate-180' : ''}`} />
             </div>
 
             {showCampaignMenu && (
-              <div className="absolute top-full left-0 mt-2 w-56 bg-white border border-parchment-dark rounded-md shadow-xl z-50 animate-fade-in overflow-hidden">
-                {availableCampaigns.map((camp, idx) => (
+              <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-parchment-dark rounded-md shadow-xl z-50 animate-fade-in overflow-hidden">
+                {campaignList.map((camp) => (
                   <div 
-                    key={idx}
-                    onClick={() => {
-                      setCampaignData(prev => ({ ...prev, campaignName: camp }));
-                      setShowCampaignMenu(false);
-                    }}
-                    className="px-4 py-2 text-sm font-serif hover:bg-parchment cursor-pointer border-b border-parchment-dark last:border-0"
+                    key={camp.id}
+                    onClick={() => { setActiveCampaignId(camp.id); setShowCampaignMenu(false); }}
+                    className={`px-4 py-3 text-sm font-serif cursor-pointer border-b border-parchment-dark transition-colors ${activeCampaignId === camp.id ? 'bg-parchment font-bold text-grimoire-dark' : 'hover:bg-gray-50 text-gray-600'}`}
                   >
-                    {camp}
+                    {camp.title}
                   </div>
                 ))}
-                <div className="px-4 py-2 text-xs font-bold text-gray-500 hover:text-grimoire-dark hover:bg-gray-50 cursor-pointer uppercase flex items-center gap-2">
+                <div 
+                  onClick={handleCreateCampaign}
+                  className="px-4 py-3 text-xs font-bold text-grimoire-gold hover:text-white hover:bg-grimoire-dark cursor-pointer uppercase flex items-center gap-2 transition-colors bg-gray-50"
+                >
                   <Plus className="w-3 h-3" /> Create New Campaign
                 </div>
               </div>
@@ -128,30 +166,27 @@ export default function Overview({ onOpenAddCharacter, onOpenChronicleModal, onO
           <div className="relative">
             <p className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mb-1">Current Chapter</p>
             <div 
-              onClick={() => {
-                setShowChapterMenu(!showChapterMenu);
-                setShowCampaignMenu(false);
-              }}
+              onClick={() => { setShowChapterMenu(!showChapterMenu); setShowCampaignMenu(false); }}
               className="flex items-center gap-2 text-grimoire-dark hover:text-grimoire-gold transition-colors cursor-pointer"
             >
               <span className="font-serif text-lg uppercase tracking-wide truncate max-w-xs">
-                {campaignData.chapterTitle || 'Session 1'}
+                {activeCampaignId ? campaignData.chapterTitle : 'Untitled Chapter'}
               </span>
               <ChevronDown className={`w-4 h-4 transition-transform ${showChapterMenu ? 'rotate-180' : ''}`} />
             </div>
 
             {showChapterMenu && (
-              <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-parchment-dark rounded-md shadow-xl z-50 animate-fade-in overflow-hidden">
-                {availableChapters.map((chap, idx) => (
+              <div className="absolute top-full left-0 mt-2 w-56 bg-white border border-parchment-dark rounded-md shadow-xl z-50 animate-fade-in overflow-hidden max-h-60 overflow-y-auto">
+                {chapterList.map((chap, idx) => (
                   <div 
                     key={idx}
                     onClick={() => {
-                      setCampaignData(prev => ({ ...prev, chapterTitle: chap }));
+                      updateCampaignInfo(activeCampaignId, { chapterTitle: chap.title });
                       setShowChapterMenu(false);
                     }}
                     className="px-4 py-2 text-sm font-serif hover:bg-parchment cursor-pointer border-b border-parchment-dark last:border-0"
                   >
-                    {chap}
+                    {chap.title}
                   </div>
                 ))}
               </div>
@@ -161,21 +196,20 @@ export default function Overview({ onOpenAddCharacter, onOpenChronicleModal, onO
 
         {/* Actions & Status */}
         <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2 px-3 py-1 bg-white border border-parchment-dark rounded-full shadow-sm">
-            <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-xs font-bold text-gray-600 uppercase tracking-wider">Live session</span>
-          </div>
-
-          <button className="relative text-gray-400 hover:text-grimoire-dark transition-colors">
-            <Bell className="w-5 h-5" />
-            <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 border-2 border-parchment rounded-full"></div>
-          </button>
-
+          {activeCampaignId && (
+            <div className="flex items-center gap-2 px-3 py-1 bg-white border border-parchment-dark rounded-full shadow-sm">
+              <div className={`w-2.5 h-2.5 rounded-full animate-pulse ${campaignData.status === 'Active' ? 'bg-green-500' : 'bg-amber-500'}`}></div>
+              <span className="text-xs font-bold text-gray-600 uppercase tracking-wider">{campaignData.status}</span>
+            </div>
+          )}
+          
+          {/* Tombol Add Chapter */}
           <button 
-            onClick={onOpenChronicleModal}
-            className="bg-grimoire-dark hover:bg-grimoire-light text-white text-sm font-bold uppercase tracking-wider py-2.5 px-5 rounded flex items-center gap-2 transition-colors shadow-md"
+            onClick={handleAddChapter}
+            disabled={!activeCampaignId}
+            className="bg-grimoire-dark hover:bg-grimoire-light text-white text-sm font-bold uppercase tracking-wider py-2.5 px-5 rounded flex items-center gap-2 shadow-md disabled:opacity-50"
           >
-            <Plus className="w-4 h-4" /> New entry
+            <Plus className="w-4 h-4" /> Add Chapter
           </button>
         </div>
       </div>
@@ -190,37 +224,56 @@ export default function Overview({ onOpenAddCharacter, onOpenChronicleModal, onO
           </div>
           <button 
             onClick={onOpenCampaignModal}
-            className="text-sm font-bold text-gray-500 hover:text-grimoire-dark border border-gray-300 rounded px-4 py-2 transition-colors"
+            disabled={!activeCampaignId}
+            className="text-sm font-bold text-gray-500 hover:text-grimoire-dark border border-gray-300 rounded px-4 py-2 disabled:opacity-50"
           >
-            Edit Status
+            Edit Campaign
           </button>
         </div>
       </div>
 
       {/* Hero Banner */}
-      <div className="relative rounded-2xl overflow-hidden mb-12 shadow-lg group">
-        <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2000&auto=format&fit=crop" alt="Campaign Hero" className="w-full h-80 object-cover object-center" />
-        <div className="absolute inset-0 bg-gradient-to-r from-gray-900/90 via-gray-900/70 to-transparent"></div>
+      {/* Container utama kini menggunakan flex dan p-10 agar otomatis melebar menyesuaikan isi */}
+      <div className="relative rounded-2xl overflow-hidden mb-12 shadow-lg group bg-gray-900 min-h-[22rem] flex flex-col justify-center p-8 md:p-10">
         
-        <div className="absolute inset-0 p-10 flex flex-col justify-center max-w-2xl">
-          <p className="text-grimoire-gold text-xs font-bold tracking-widest uppercase mb-3">CURRENT CHAPTER</p>
-          <h1 className="text-4xl md:text-5xl font-serif text-white uppercase leading-tight mb-4">
-            {campaignData.chapterTitle}
-          </h1>
-          <p className="text-gray-300 text-lg leading-relaxed mb-8">
-            {campaignData.description}
-          </p>
+        <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2000&auto=format&fit=crop" alt="Hero" className="absolute inset-0 w-full h-full object-cover object-center opacity-70" />
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-950 via-gray-900/80 to-transparent"></div>
+        
+        {/* Konten menggunakan relative z-10 agar mendorong tinggi container */}
+        <div className="relative z-10 flex flex-col justify-center max-w-3xl w-full">
+          {/* Campaign Section */}
+          <div className="mb-6">
+            <p className="text-grimoire-gold text-[10px] font-bold tracking-widest uppercase mb-3">CURRENT CAMPAIGN ({campaignData.system})</p>
+            <h1 className="text-4xl md:text-5xl font-serif text-white uppercase leading-tight mb-2">{campaignData.title}</h1>
+            <p className="text-gray-400 text-sm leading-relaxed max-w-xl">
+              {campaignData.campaignDescription || campaignData.description || 'Deskripsi kampanye belum diatur.'}
+            </p>
+          </div>
+
+          {/* Current Chapter Section */}
+          <div className="bg-black/40 border border-gray-700/50 rounded-xl p-5 backdrop-blur-sm mb-6 inline-block w-fit min-w-[20rem] max-w-xl shadow-inner">
+            <p className="text-grimoire-gold text-[10px] font-bold tracking-widest uppercase mb-1">CURRENT CHAPTER</p>
+            <h3 className="font-serif text-xl md:text-2xl text-white uppercase mb-2">{campaignData.chapterTitle}</h3>
+            <p className="text-gray-300 text-sm italic">
+              {campaignData.chapterDescription || 'Objektif bab ini belum ditentukan. Klik Edit Campaign untuk menambahkannya.'}
+            </p>
+          </div>
           
           <div className="flex gap-4">
-            <button className="bg-parchment-light hover:bg-white text-grimoire-dark font-bold py-3 px-6 rounded transition-colors flex items-center gap-2">
+            {/* Tombol Continue memanggil setActiveView('notes') */}
+            <button 
+              onClick={() => setActiveView('notes')}
+              className="bg-parchment hover:bg-white text-grimoire-dark font-bold py-2.5 px-6 rounded transition-colors flex items-center gap-2 text-sm shadow-md"
+            >
               Continue session <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        <div className="absolute bottom-6 right-6 bg-gray-900/80 backdrop-blur border border-gray-700 rounded-xl p-5 w-64">
+        {/* Progress Bar */}
+        <div className="hidden md:block absolute bottom-6 right-6 bg-gray-900/80 backdrop-blur border border-gray-700 rounded-xl p-5 w-64 shadow-xl z-10">
           <div className="flex justify-between items-end mb-2">
-            <span className="text-xs text-gray-400 font-bold tracking-widest uppercase">Campaign Progress</span>
+            <span className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">Campaign Progress</span>
             <span className="text-xl font-serif text-white">{campaignData.progress}%</span>
           </div>
           <div className="w-full h-1.5 bg-gray-700 rounded-full overflow-hidden">
@@ -247,7 +300,12 @@ export default function Overview({ onOpenAddCharacter, onOpenChronicleModal, onO
           ))
         ) : Object.keys(partyMembers).length > 0 ? (
           Object.entries(partyMembers).map(([id, character]) => (
-            <PartyCard key={id} id={id} character={character} />
+            <PartyCard 
+              key={id} 
+              id={id} 
+              character={character} 
+              activeCampaignId={activeCampaignId} 
+            />
           ))
         ) : (
           <p className="text-gray-500 text-sm col-span-4">Belum ada karakter yang terdaftar di party.</p>
@@ -283,7 +341,7 @@ export default function Overview({ onOpenAddCharacter, onOpenChronicleModal, onO
                     {index === 0 && <span className="text-[10px] bg-grimoire-dark text-white px-2 py-0.5 rounded font-medium">LATEST</span>}
                   </div>
                   <button 
-                    onClick={() => { if(window.confirm('Hapus cerita ini?')) deleteChronicle(entry.id) }}
+                    onClick={() => { if(window.confirm('Hapus cerita ini?')) deleteChronicle(activeCampaignId, entry.id) }}
                     className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -319,7 +377,7 @@ export default function Overview({ onOpenAddCharacter, onOpenChronicleModal, onO
                       type="checkbox" 
                       className="hidden" 
                       checked={item.isCompleted} 
-                      onChange={() => togglePrepItem(item.id, item.isCompleted)} 
+                      onChange={() => togglePrepItem(activeCampaignId, item.id, item.isCompleted)}
                     />
                     {item.isCompleted ? (
                       <CheckSquare className="w-5 h-5 text-grimoire-gold mt-0.5 shrink-0" />
@@ -331,7 +389,7 @@ export default function Overview({ onOpenAddCharacter, onOpenChronicleModal, onO
                     </span>
                   </label>
                   <button 
-                    onClick={() => deletePrepItem(item.id)}
+                    onClick={() => deletePrepItem(activeCampaignId, item.id)}
                     className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity ml-2"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -345,11 +403,11 @@ export default function Overview({ onOpenAddCharacter, onOpenChronicleModal, onO
             <form 
               onSubmit={(e) => {
                 e.preventDefault();
-                if(newPrep.trim()) {
-                  addPrepItem(newPrep);
+                if(newPrep.trim() && activeCampaignId) {
+                  addPrepItem(activeCampaignId, newPrep);
                   setNewPrep('');
                 }
-              }} 
+              }}
               className="flex gap-2 mb-4"
             >
               <input 
@@ -363,10 +421,6 @@ export default function Overview({ onOpenAddCharacter, onOpenChronicleModal, onO
                 <Plus className="w-4 h-4" />
               </button>
             </form>
-
-            <button className="w-full py-2.5 border border-parchment-dark rounded hover:bg-parchment text-sm font-medium transition-colors">
-              Open session notes
-            </button>
           </div>
 
           <div 
@@ -379,7 +433,7 @@ export default function Overview({ onOpenAddCharacter, onOpenChronicleModal, onO
               </div>
               <div>
                 <p className="text-[10px] font-bold text-grimoire-gold uppercase tracking-wider mb-0.5">Current Location</p>
-                <p className="font-serif font-bold text-sm uppercase">{campaignData.locationName}</p>
+                <p className="font-serif font-bold text-sm uppercase">{campaignData.currentLocation}</p>
                 <p className="text-xs text-gray-500">{campaignData.locationDesc}</p>
               </div>
             </div>

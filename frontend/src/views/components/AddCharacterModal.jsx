@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { X, UserPlus, Shield, Heart, Swords, Fingerprint } from 'lucide-react';
 import { addCharacter } from '../../controllers/partyController';
 
-export default function AddCharacterModal({ isOpen, onClose }) {
+// TAMBAHKAN activeCampaignId di props
+export default function AddCharacterModal({ isOpen, onClose, activeCampaignId }) {
   const [formData, setFormData] = useState({
     name: '',
     characterClass: 'Fighter',
@@ -13,24 +14,28 @@ export default function AddCharacterModal({ isOpen, onClose }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Jika modal tidak dibuka, jangan render apa pun
   if (!isOpen) return null;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validasi apakah ada kampanye yang dipilih
+    if (!activeCampaignId) {
+      setError("Tidak ada Campaign yang aktif. Silakan pilih atau buat Campaign baru di Overview.");
+      return;
+    }
+
     setLoading(true);
     setError('');
 
     try {
-      await addCharacter({
+      // KIRIM activeCampaignId KE CONTROLLER
+      await addCharacter(activeCampaignId, {
         name: formData.name,
         characterClass: formData.characterClass,
         race: formData.race,
@@ -39,7 +44,6 @@ export default function AddCharacterModal({ isOpen, onClose }) {
         ac: parseInt(formData.ac)
       });
       
-      // Reset form dan tutup modal setelah sukses
       setFormData({ name: '', characterClass: 'Fighter', race: 'Human', hpMax: 10, ac: 15 });
       onClose();
     } catch (err) {
@@ -61,10 +65,7 @@ export default function AddCharacterModal({ isOpen, onClose }) {
             </div>
             <h2 className="text-2xl font-serif uppercase">Add Party Member</h2>
           </div>
-          <button 
-            onClick={onClose}
-            className="text-gray-400 hover:text-grimoire-dark transition-colors p-1"
-          >
+          <button onClick={onClose} className="text-gray-400 hover:text-grimoire-dark transition-colors p-1">
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -84,12 +85,8 @@ export default function AddCharacterModal({ isOpen, onClose }) {
                 <Fingerprint className="w-3 h-3" /> Character Name
               </label>
               <input 
-                type="text" 
-                name="name"
-                required 
-                placeholder="e.g. Elowen Starseeker"
-                value={formData.name}
-                onChange={handleChange}
+                type="text" name="name" required placeholder="e.g. Elowen Starseeker"
+                value={formData.name} onChange={handleChange}
                 className="w-full px-4 py-2.5 bg-white border border-parchment-dark rounded focus:outline-none focus:border-grimoire-gold focus:ring-1 focus:ring-grimoire-gold font-serif text-lg"
               />
             </div>
@@ -97,16 +94,10 @@ export default function AddCharacterModal({ isOpen, onClose }) {
             <div className="grid grid-cols-2 gap-4">
               {/* Race */}
               <div>
-                <label className="flex items-center gap-2 text-xs font-bold tracking-widest text-gray-500 uppercase mb-1">
-                  Race
-                </label>
+                <label className="flex items-center gap-2 text-xs font-bold tracking-widest text-gray-500 uppercase mb-1">Race</label>
                 <input 
-                  type="text" 
-                  name="race"
-                  required 
-                  placeholder="e.g. Elf"
-                  value={formData.race}
-                  onChange={handleChange}
+                  type="text" name="race" required placeholder="e.g. Elf"
+                  value={formData.race} onChange={handleChange}
                   className="w-full px-4 py-2 bg-white border border-parchment-dark rounded focus:outline-none focus:border-grimoire-gold text-sm"
                 />
               </div>
@@ -117,12 +108,8 @@ export default function AddCharacterModal({ isOpen, onClose }) {
                   <Swords className="w-3 h-3" /> Class
                 </label>
                 <input 
-                  type="text" 
-                  name="characterClass"
-                  required 
-                  placeholder="e.g. Ranger"
-                  value={formData.characterClass}
-                  onChange={handleChange}
+                  type="text" name="characterClass" required placeholder="e.g. Ranger"
+                  value={formData.characterClass} onChange={handleChange}
                   className="w-full px-4 py-2 bg-white border border-parchment-dark rounded focus:outline-none focus:border-grimoire-gold text-sm"
                 />
               </div>
@@ -135,12 +122,8 @@ export default function AddCharacterModal({ isOpen, onClose }) {
                   <Heart className="w-3 h-3" /> Max HP
                 </label>
                 <input 
-                  type="number" 
-                  name="hpMax"
-                  required 
-                  min="1"
-                  value={formData.hpMax}
-                  onChange={handleChange}
+                  type="number" name="hpMax" required min="1"
+                  value={formData.hpMax} onChange={handleChange}
                   className="w-full px-4 py-2 bg-white border border-parchment-dark rounded focus:outline-none focus:border-grimoire-gold text-lg font-bold font-serif text-center"
                 />
               </div>
@@ -151,12 +134,8 @@ export default function AddCharacterModal({ isOpen, onClose }) {
                   <Shield className="w-3 h-3" /> Armor Class
                 </label>
                 <input 
-                  type="number" 
-                  name="ac"
-                  required 
-                  min="1"
-                  value={formData.ac}
-                  onChange={handleChange}
+                  type="number" name="ac" required min="1"
+                  value={formData.ac} onChange={handleChange}
                   className="w-full px-4 py-2 bg-white border border-parchment-dark rounded focus:outline-none focus:border-grimoire-gold text-lg font-bold font-serif text-center"
                 />
               </div>
@@ -164,18 +143,10 @@ export default function AddCharacterModal({ isOpen, onClose }) {
 
             {/* Footer Modal / Actions */}
             <div className="pt-6 flex justify-end gap-3 border-t border-parchment-dark mt-6">
-              <button 
-                type="button"
-                onClick={onClose}
-                className="px-5 py-2.5 text-sm font-bold text-gray-500 hover:text-grimoire-dark transition-colors"
-              >
+              <button type="button" onClick={onClose} className="px-5 py-2.5 text-sm font-bold text-gray-500 hover:text-grimoire-dark transition-colors">
                 Cancel
               </button>
-              <button 
-                type="submit" 
-                disabled={loading}
-                className="bg-grimoire-dark hover:bg-grimoire-light text-white font-bold py-2.5 px-6 rounded transition-colors disabled:opacity-50 flex items-center gap-2"
-              >
+              <button type="submit" disabled={loading} className="bg-grimoire-dark hover:bg-grimoire-light text-white font-bold py-2.5 px-6 rounded transition-colors disabled:opacity-50 flex items-center gap-2">
                 {loading ? 'Summoning...' : 'Add to Party'}
               </button>
             </div>

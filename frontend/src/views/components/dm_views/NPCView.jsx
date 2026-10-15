@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Users, Search, Plus, Sparkles, MapPin, Trash2 } from 'lucide-react';
+import { Users, Search, Plus, Sparkles, MapPin, Trash2, Edit2 } from 'lucide-react';
 import { ref, onValue } from 'firebase/database';
 import { db } from '../../../firebase';
 import { deleteNpc } from '../../../controllers/npcController';
+import EditNPCModal from '../EditNPCModal';
 
 // Menerima prop onOpenScribe agar bisa memanggil modal AI dari Dashboard utama
 export default function NpcView({ onOpenScribe }) {
   const [npcs, setNpcs] = useState([]);
+  const [expandedId, setExpandedId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedNpcToEdit, setSelectedNpcToEdit] = useState(null);
 
   useEffect(() => {
     const npcRef = ref(db, 'campaign/active/npcs');
@@ -71,19 +75,37 @@ export default function NpcView({ onOpenScribe }) {
           {filteredNpcs.map(npc => (
             <div key={npc.id} className="bg-white border border-parchment-dark rounded-xl p-5 shadow-sm relative group hover:border-grimoire-gold transition-colors flex flex-col h-full">
               
-              <button 
-                onClick={() => { if(window.confirm(`Hapus ${npc.name} dari catatan?`)) deleteNpc(npc.id) }}
-                className="absolute top-4 right-4 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+              {/* Tombol Aksi (Edit & Delete) muncul saat di-hover */}
+              <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                <button 
+                  onClick={(e) => { 
+                    e.stopPropagation();
+                    setSelectedNpcToEdit(npc);
+                    setIsEditModalOpen(true);
+                  }}
+                  className="text-gray-300 hover:text-blue-500 transition-colors bg-white/80 rounded-full p-1"
+                  title="Edit NPC"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+                <button 
+                  onClick={(e) => { 
+                    e.stopPropagation();
+                    if(window.confirm(`Hapus ${npc.name} dari catatan?`)) deleteNpc(npc.id); 
+                  }}
+                  className="text-gray-300 hover:text-red-500 transition-colors bg-white/80 rounded-full p-1"
+                  title="Hapus NPC"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
 
               <div className="flex items-start gap-4 mb-4">
                 <div className="w-12 h-12 bg-parchment border border-parchment-dark text-grimoire-dark flex items-center justify-center rounded-full font-serif text-lg font-bold shrink-0">
                   {npc.name.substring(0, 2).toUpperCase()}
                 </div>
                 <div>
-                  <h3 className="font-serif font-bold text-lg uppercase text-grimoire-dark leading-tight pr-6">{npc.name}</h3>
+                  <h3 className="font-serif font-bold text-lg uppercase text-grimoire-dark leading-tight pr-12">{npc.name}</h3>
                   <p className="text-xs text-grimoire-gold font-bold uppercase tracking-wider">{npc.role}</p>
                 </div>
               </div>
@@ -92,9 +114,18 @@ export default function NpcView({ onOpenScribe }) {
                 <MapPin className="w-3 h-3" /> {npc.location}
               </div>
 
-              <p className="text-sm text-gray-600 line-clamp-4 flex-1 mb-4 italic">
-                "{npc.description}"
-              </p>
+              {/* Area Deskripsi yang bisa di-klik untuk Expand/Collapse */}
+              <div 
+                className="mb-4 flex-1 cursor-pointer group/desc relative"
+                onClick={() => setExpandedId(expandedId === npc.id ? null : npc.id)}
+              >
+                <p className={`text-sm text-gray-600 transition-all duration-300 italic ${expandedId === npc.id ? '' : 'line-clamp-4'}`}>
+                  "{npc.description}"
+                </p>
+                <p className="text-xs font-semibold text-grimoire-gold mt-1.5 opacity-0 group-hover/desc:opacity-100 transition-opacity inline-block">
+                  {expandedId === npc.id ? 'Tutup deskripsi' : 'Baca selengkapnya...'}
+                </p>
+              </div>
               
               <div className="mt-auto pt-3 border-t border-parchment-dark">
                 <p className="text-xs text-gray-500"><span className="font-bold text-grimoire-dark">Traits:</span> {npc.traits}</p>
@@ -117,6 +148,14 @@ export default function NpcView({ onOpenScribe }) {
           </button>
         </div>
       )}
+      <EditNPCModal 
+        isOpen={isEditModalOpen} 
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedNpcToEdit(null);
+        }} 
+        npcData={selectedNpcToEdit} 
+      />
     </div>
   );
 }
