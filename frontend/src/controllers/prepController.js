@@ -14,7 +14,7 @@ export const addPrepItem = async (text) => {
       createdAt: Date.now()
     });
   } catch (error) {
-    throw new Error(`Gagal menambah prep item: ${error.message}`);
+    throw new Error(`Gagal menambah prep item: ${error.message}`, { cause: error });
   }
 };
 
@@ -23,7 +23,7 @@ export const togglePrepItem = async (itemId, currentStatus) => {
     const itemRef = ref(db, `${prepPath}/${itemId}`);
     await update(itemRef, { isCompleted: !currentStatus });
   } catch (error) {
-    throw new Error(`Gagal update status: ${error.message}`);
+    throw new Error(`Gagal update status: ${error.message}`, { cause: error });
   }
 };
 
@@ -32,6 +32,6 @@ export const deletePrepItem = async (itemId) => {
     const itemRef = ref(db, `${prepPath}/${itemId}`);
     await remove(itemRef);
   } catch (error) {
-    throw new Error(`Gagal menghapus item: ${error.message}`);
+    throw new Error(`Gagal menghapus item: ${error.message}`, { cause: error });
   }
 };

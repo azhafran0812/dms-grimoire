@@ -23,13 +23,14 @@ const MCP_TIMEOUT_MS = 60000; // 60s — AI generation can be slow
  * @returns {Promise<object>} — MCP response envelope { ok, data, error, meta }
  * @throws {AppError} On timeout, network error, or invalid response
  */
-export async function generateNpc({ prompt, type = "Mysterious NPC", partyContext = null, render = true }) {
+export async function generateNpc({ prompt, type = "Mysterious NPC", partyContext = null, render = true, simulate = false }) {
 	const url = `${config.mcp.baseUrl}/api/generate-npc`;
 
 	const body = {
 		prompt,
 		type,
 		render,
+		simulate,
 	};
 
 	// Inject party context if available (Tugas 25: auto-inject party data)

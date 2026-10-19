@@ -18,7 +18,8 @@ export default function Login() {
   
   try {
     const userData = await loginUser(email, password);
-    if (userData.role === 'dm') {
+    const userRole = (userData.role || '').toLowerCase();
+    if (userRole === 'dm' || userRole === 'dungeon_master') {
       navigate('/dashboard/dm');
     } else {
       navigate('/dashboard/player');

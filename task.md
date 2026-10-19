@@ -55,53 +55,53 @@ Dokumen ini memuat seluruh daftar tugas, spesifikasi operasional, kebutuhan arsi
 ## Bagian III: Implementasi 12 Operasi CRUD (Firebase Realtime Database)
 
 ### A. Manajemen Karakter Player (4 Operasi CRUD)
-- [ ] 11. **CRUD Karakter 1 - Create: Pendaftaran Profil Karakter Baru**  
+- [x] 11. **CRUD Karakter 1 - Create: Pendaftaran Profil Karakter Baru**  
   *Deskripsi:* Menyediakan antarmuka dan fungsi database untuk menambahkan profil karakter baru (nama karakter misal: *Krakatoa Abysswhirl* atau *Bryn*, class, race, level awal, total HP) ke node `/characters` di Firebase Realtime Database.  
   *Penanggung Jawab:* Abyan Zhafran (Backend & Database Architect)
 
-- [ ] 12. **CRUD Karakter 2 - Read: Monitoring Status Karakter Real-Time**  
+- [x] 12. **CRUD Karakter 2 - Read: Monitoring Status Karakter Real-Time**  
   *Deskripsi:* Mengambil dan menampilkan data seluruh karakter aktif secara real-time via WebSocket Firebase SDK, mencakup status sisa Hit Points (HP), level, race, dan class tanpa perlu memuat ulang halaman (*zero refresh*).  
   *Penanggung Jawab:* Abyan Zhafran (Backend & Database Architect)
 
-- [ ] 13. **CRUD Karakter 3 - Update: Mutasi Sisa Poin HP dan Level Karakter**  
+- [x] 13. **CRUD Karakter 3 - Update: Mutasi Sisa Poin HP dan Level Karakter**  
   *Deskripsi:* Mengimplementasikan fungsi perubahan nilai dinamis sisa HP saat karakter terkena damage/healing atau kenaikan level saat petualangan berlangsung.  
   *Penanggung Jawab:* Abyan Zhafran (Backend & Database Architect)
 
-- [ ] 14. **CRUD Karakter 4 - Delete: Pencabutan Karakter Mati Permanen (Permadeath)**  
+- [x] 14. **CRUD Karakter 4 - Delete: Pencabutan Karakter Mati Permanen (Permadeath)**  
   *Deskripsi:* Menyediakan mekanisme penghapusan entitas karakter dari database jika karakter gugur dalam kampanye sesuai aturan *permadeath* D&D.  
   *Penanggung Jawab:* Abyan Zhafran (Backend & Database Architect)
 
 ### B. Manajemen Inventaris Party (4 Operasi CRUD)
-- [ ] 15. **CRUD Inventaris 1 - Create: Penambahan Item Loot Petualangan**  
+- [x] 15. **CRUD Inventaris 1 - Create: Penambahan Item Loot Petualangan**  
   *Deskripsi:* Menambahkan item loot baru yang ditemukan party ke dalam node kolektif `/inventory` (nama item, tipe item, kuantitas, deskripsi item).  
   *Penanggung Jawab:* Abyan Zhafran (Backend & Database Architect)
 
-- [ ] 16. **CRUD Inventaris 2 - Read: Rekapitulasi Daftar Item Seluruh Party**  
+- [x] 16. **CRUD Inventaris 2 - Read: Rekapitulasi Daftar Item Seluruh Party**  
   *Deskripsi:* Menampilkan katalog inventaris bersama secara live di layar semua pemain dan Dungeon Master secara instan melalui sinkronisasi Firebase Realtime Database.  
   *Penanggung Jawab:* Abyan Zhafran (Backend & Database Architect)
 
-- [ ] 17. **CRUD Inventaris 3 - Update: Pengurangan Kuantitas Item Konsumsi**  
+- [x] 17. **CRUD Inventaris 3 - Update: Pengurangan Kuantitas Item Konsumsi**  
   *Deskripsi:* Mengurangi atau mengubah jumlah kuantitas item dalam inventaris saat digunakan dalam sesi bermain (contoh: konsumsi potion penyembuh).  
   *Penanggung Jawab:* Galang Reisduanto (Frontend & AI Integration)
 
-- [ ] 18. **CRUD Inventaris 4 - Delete: Pembuangan Item dari Tas Petualang**  
+- [x] 18. **CRUD Inventaris 4 - Delete: Pembuangan Item dari Tas Petualang**  
   *Deskripsi:* Menghapus item secara permanen dari tas kolektif saat item dibuang, hancur, atau dijual oleh party.  
   *Penanggung Jawab:* Galang Reisduanto (Frontend & AI Integration)
 
 ### C. Manajemen Database NPC & Lore (4 Operasi CRUD)
-- [ ] 19. **CRUD NPC 1 - Create: Injeksi Profil Tokoh NPC Baru**  
+- [x] 19. **CRUD NPC 1 - Create: Injeksi Profil Tokoh NPC Baru**  
   *Deskripsi:* Membuat entitas NPC baru ke node `/npcs` baik melalui input manual Dungeon Master maupun secara otomatis dari hasil output AI Generator.  
   *Penanggung Jawab:* Galang Reisduanto (Frontend & AI Integration)
 
-- [ ] 20. **CRUD NPC 2 - Read: Tampilan Katalog Penduduk Wilayah Aktif**  
+- [x] 20. **CRUD NPC 2 - Read: Tampilan Katalog Penduduk Wilayah Aktif**  
   *Deskripsi:* Mengambil dan menampilkan daftar NPC, profil latar belakang (*lore*), lokasi wilayah/kota, serta status relasi di layar Dungeon Master.  
   *Penanggung Jawab:* Galang Reisduanto (Frontend & AI Integration)
 
-- [ ] 21. **CRUD NPC 3 - Update: Transisi Status Hubungan Tokoh (Ramah/Bermusuhan)**  
+- [x] 21. **CRUD NPC 3 - Update: Transisi Status Hubungan Tokoh (Ramah/Bermusuhan)**  
   *Deskripsi:* Memperbarui status disposisi NPC terhadap pemain (Ramah, Netral, Bermusuhan) seiring perkembangan interaksi naratif kampanye.  
   *Penanggung Jawab:* Galang Reisduanto (Frontend & AI Integration)
 
-- [ ] 22. **CRUD NPC 4 - Delete: Penghapusan Entitas NPC Cerita Lampau**  
+- [x] 22. **CRUD NPC 4 - Delete: Penghapusan Entitas NPC Cerita Lampau**  
   *Deskripsi:* Menghapus catatan profil NPC dari database ketika tokoh tersebut telah tewas atau alur cerita/quest tokoh tersebut telah selesai.  
   *Penanggung Jawab:* Galang Reisduanto (Frontend & AI Integration)
 
@@ -109,27 +109,27 @@ Dokumen ini memuat seluruh daftar tugas, spesifikasi operasional, kebutuhan arsi
 
 ## Bagian IV: Integrasi Layanan Cloud Tambahan (AI Assistant - Google Gemini API)
 
-- [ ] 23. **Setup Kredensial & SDK Google Gemini API**  
+- [x] 23. **Setup Kredensial & SDK Google Gemini API**  
   *Deskripsi:* Mengonfigurasi Google AI Studio, memperoleh API Key Gemini, dan mengintegrasikan pustaka klien AI pada sisi server Node.js.  
   *Penanggung Jawab:* Galang Reisduanto (Frontend & AI Integration)
 
-- [ ] 24. **Pembuatan Endpoint Backend AI Generator (`/api/generate-npc`)**  
+- [x] 24. **Pembuatan Endpoint Backend AI Generator (`/api/generate-npc`)**  
   *Deskripsi:* Membangun endpoint Express.js untuk menerima request prompt singkat dari DM, menyusun sistem prompt, dan meneruskannya ke Google Gemini API secara aman.  
   *Penanggung Jawab:* Galang Reisduanto (didukung oleh Abyan Zhafran)
 
-- [ ] 25. **Implementasi Konteks Otomatis Profil Party ke Sistem Prompt**  
+- [x] 25. **Implementasi Konteks Otomatis Profil Party ke Sistem Prompt**  
   *Deskripsi:* Merancang logika backend yang secara otomatis menyisipkan data party saat ini (level rata-rata, status party seperti Krakatoa atau Bryn) ke dalam *secret prompt* di balik layar tanpa perlu diketik ulang oleh DM.  
   *Penanggung Jawab:* Galang Reisduanto (Frontend & AI Integration)
 
-- [ ] 26. **Formatting Output AI Menjadi Data JSON Terstruktur**  
+- [x] 26. **Formatting Output AI Menjadi Data JSON Terstruktur**  
   *Deskripsi:* Menyesuaikan prompt engineering agar AI tidak sekadar mengembalikan teks mentah, melainkan objek JSON valid (nama NPC, kepribadian, stat, lore latar belakang, status relasi) yang siap disimpan ke Firebase.  
   *Penanggung Jawab:* Galang Reisduanto (Frontend & AI Integration)
 
-- [ ] 27. **Integrasi Tombol "Generate NPC AI" pada Dashboard DM**  
+- [x] 27. **Integrasi Tombol "Generate NPC AI" pada Dashboard DM**  
   *Deskripsi:* Menghubungkan antarmuka tombol pada dasbor dengan endpoint AI, menampilkan indikator pemrosesan (*loading state*), dan otomatis memicu fungsi Create NPC ke database.  
   *Penanggung Jawab:* Galang Reisduanto (Frontend & AI Integration)
 
-- [ ] 28. **Penyimpanan Permanen Hasil Generasi AI ke Firebase Realtime Database**  
+- [x] 28. **Penyimpanan Permanen Hasil Generasi AI ke Firebase Realtime Database**  
   *Deskripsi:* Memastikan riwayat cerita dan statistik NPC hasil generasi AI tersimpan permanen di cloud agar tidak hilang akibat keterbatasan *context window* model AI standar.  
   *Penanggung Jawab:* Galang Reisduanto & Abyan Zhafran
 
@@ -137,31 +137,31 @@ Dokumen ini memuat seluruh daftar tugas, spesifikasi operasional, kebutuhan arsi
 
 ## Bagian V: Desain Antarmuka Pengguna & Frontend Dashboard (UI/UX)
 
-- [ ] 29. **Perancangan Konsep UI/UX Dasbor Bertema D&D / Grimoire**  
+- [x] 29. **Perancangan Konsep UI/UX Dasbor Bertema D&D / Grimoire**  
   *Deskripsi:* Merancang tata letak visual estetis bertema fantasi gelap/grimoire menggunakan CSS modern/Tailwind CSS yang ergonomis dan mudah dibaca saat sesi permainan berlangsung.  
   *Penanggung Jawab:* Galang Reisduanto (Frontend & AI Integration)
 
-- [ ] 30. **Implementasi Arsitektur 3 Panel Utama Dashboard**  
+- [x] 30. **Implementasi Arsitektur 3 Panel Utama Dashboard**  
   *Deskripsi:* Membangun tata letak dasbor yang terbagi rapi menjadi 3 panel interaktif: Panel Karakter Player, Panel Inventaris Party, dan Panel NPC & Lore.  
   *Penanggung Jawab:* Galang Reisduanto (Frontend & AI Integration)
 
-- [ ] 31. **Implementasi Panel Karakter (Kartu Pemain & Indikator HP)**  
+- [x] 31. **Implementasi Panel Karakter (Kartu Pemain & Indikator HP)**  
   *Deskripsi:* Merender kartu profil pemain dengan bilah visual HP dinamis, tombol mutasi damage/heal, indikator level, class, dan race.  
   *Penanggung Jawab:* Galang Reisduanto (Frontend & AI Integration)
 
-- [ ] 32. **Implementasi Panel Inventaris (Daftar Loot & Counter Kuantitas)**  
+- [x] 32. **Implementasi Panel Inventaris (Daftar Loot & Counter Kuantitas)**  
   *Deskripsi:* Merender tabel/kisi inventaris bersama dengan filter tipe item, kontrol tambah/kurang kuantitas secara langsung, dan tombol hapus item.  
   *Penanggung Jawab:* Galang Reisduanto (Frontend & AI Integration)
 
-- [ ] 33. **Implementasi Panel NPC & Dialog Modal AI Generator**  
+- [x] 33. **Implementasi Panel NPC & Dialog Modal AI Generator**  
   *Deskripsi:* Merender daftar NPC dengan badge status permusuhan (Ramah/Netral/Bermusuhan), modal input prompt AI, dan form penambahan manual.  
   *Penanggung Jawab:* Galang Reisduanto (Frontend & AI Integration)
 
-- [ ] 34. **Implementasi Responsivitas Antarmuka (Multi-Device Layout)**  
+- [x] 34. **Implementasi Responsivitas Antarmuka (Multi-Device Layout)**  
   *Deskripsi:* Memastikan tampilan web responsif diakses dari perangkat laptop/desktop Dungeon Master maupun smartphone/tablet para pemain.  
   *Penanggung Jawab:* Galang Reisduanto (Frontend & AI Integration)
 
-- [ ] 35. **Koneksi Frontend ke Firebase Client SDK (Real-Time Listener)**  
+- [x] 35. **Koneksi Frontend ke Firebase Client SDK (Real-Time Listener)**  
   *Deskripsi:* Mengikat state aplikasi lokal dengan listener `onValue()` Firebase SDK agar perubahan data tersinkronisasi instan di layar seluruh pemain tanpa membebani server Node.js.  
   *Penanggung Jawab:* Galang Reisduanto & Abyan Zhafran
 
@@ -191,19 +191,19 @@ Dokumen ini memuat seluruh daftar tugas, spesifikasi operasional, kebutuhan arsi
   *Penanggung Jawab:* Abyan Zhafran
 
 ### B. Rincian Tanggung Jawab Galang Reisduanto (Frontend & AI Integration)
-- [ ] 41. **Desain & Implementasi UI/UX Dashboard Kampanye**  
+- [x] 41. **Desain & Implementasi UI/UX Dashboard Kampanye**  
   *Deskripsi:* Bertanggung jawab penuh atas perancangan antarmuka visual, layout 3 panel, responsivitas, dan interaktivitas komponen klien.  
   *Penanggung Jawab:* Galang Reisduanto
 
-- [ ] 42. **Integrasi Layanan Cloud Tambahan (Google Gemini AI API)**  
+- [x] 42. **Integrasi Layanan Cloud Tambahan (Google Gemini AI API)**  
   *Deskripsi:* Bertanggung jawab atas integrasi fitur ekstra cloud AI, pembuatan endpoint proxy, dan orkestrasi pemanggilan model AI.  
   *Penanggung Jawab:* Galang Reisduanto
 
-- [ ] 43. **Prompt Engineering & Kontekstualisasi AI NPC Generator**  
+- [x] 43. **Prompt Engineering & Kontekstualisasi AI NPC Generator**  
   *Deskripsi:* Bertanggung jawab atas penyusunan prompt otomatis, injeksi data party, dan penataan output JSON terstruktur dari AI.  
   *Penanggung Jawab:* Galang Reisduanto
 
-- [ ] 44. **Penyelesaian 6 Fungsi CRUD Pendukung (NPC 1-4 & Inventaris 3-4)**  
+- [x] 44. **Penyelesaian 6 Fungsi CRUD Pendukung (NPC 1-4 & Inventaris 3-4)**  
   *Deskripsi:* Mengembangkan dan memvalidasi operasi Create NPC, Read NPC, Update NPC, Delete NPC, Update Inventaris, dan Delete Inventaris pada Firebase Realtime Database.  
   *Penanggung Jawab:* Galang Reisduanto
 

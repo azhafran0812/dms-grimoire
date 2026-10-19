@@ -15,7 +15,7 @@ export const addLore = async (loreData) => {
       createdAt: Date.now()
     });
   } catch (error) {
-    throw new Error(`Gagal menambah Lore: ${error.message}`);
+    throw new Error(`Gagal menambah Lore: ${error.message}`, { cause: error });
   }
 };
 
@@ -24,6 +24,6 @@ export const deleteLore = async (id) => {
     const loreRef = ref(db, `${lorePath}/${id}`);
     await remove(loreRef);
   } catch (error) {
-    throw new Error(`Gagal menghapus Lore: ${error.message}`);
+    throw new Error(`Gagal menghapus Lore: ${error.message}`, { cause: error });
   }
 };

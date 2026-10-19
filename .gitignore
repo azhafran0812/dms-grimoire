@@ -7,6 +7,10 @@
 .uploads
 .scratch/
 .scratch
+laporan/
+laporan
+account.txt
+
 
 # Environment & Secret Configurations (DO NOT COMMIT)
 .env

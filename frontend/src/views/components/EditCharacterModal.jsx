@@ -1,18 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { X, UserCog } from 'lucide-react';
 import { updateFullCharacter } from '../../controllers/partyController';
+import GrimoireAvatar from './shared/GrimoireAvatar';
 
 export default function EditCharacterModal({ isOpen, onClose, characterData }) {
-  const [formData, setFormData] = useState(null);
+  const [prevChar, setPrevChar] = useState(characterData);
+  const [formData, setFormData] = useState(() => (characterData ? JSON.parse(JSON.stringify(characterData)) : null));
   const [loading, setLoading] = useState(false);
 
-  // Sinkronisasi data saat modal dibuka
-  useEffect(() => {
-    if (characterData && isOpen) {
-      // Deep copy agar tidak mengubah state asli sebelum disave
-      setFormData(JSON.parse(JSON.stringify(characterData)));
-    }
-  }, [characterData, isOpen]);
+  if (characterData !== prevChar) {
+    setPrevChar(characterData);
+    setFormData(characterData ? JSON.parse(JSON.stringify(characterData)) : null);
+  }
 
   if (!isOpen || !formData) return null;
 
@@ -45,9 +44,7 @@ export default function EditCharacterModal({ isOpen, onClose, characterData }) {
         
         <div className="flex justify-between items-center p-6 border-b border-parchment-dark bg-white/50 sticky top-0 z-10 rounded-t-xl">
           <div className="flex items-center gap-3">
-            <div className="bg-grimoire-dark p-2 rounded">
-              <UserCog className="text-grimoire-gold w-5 h-5" />
-            </div>
+            <GrimoireAvatar entity={formData} size="md" />
             <h2 className="text-2xl font-serif uppercase">Edit Character Sheet: {formData.name}</h2>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-grimoire-dark">
@@ -60,7 +57,7 @@ export default function EditCharacterModal({ isOpen, onClose, characterData }) {
           {/* BAGIAN 1: Basic Info */}
           <div>
             <h3 className="text-sm font-bold text-grimoire-gold tracking-widest uppercase mb-4 border-b border-parchment-dark pb-2">Basic Info</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Name</label>
                 <input type="text" value={formData.name} onChange={(e) => handleChange(null, 'name', e.target.value)} required className="w-full px-3 py-2 border border-parchment-dark rounded font-serif" />
@@ -72,6 +69,10 @@ export default function EditCharacterModal({ isOpen, onClose, characterData }) {
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Level</label>
                 <input type="number" value={formData.level || 1} onChange={(e) => handleChange(null, 'level', e.target.value)} required className="w-full px-3 py-2 border border-parchment-dark rounded font-serif" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Avatar URL (Optional)</label>
+                <input type="text" placeholder="https://..." value={formData.avatarUrl || ''} onChange={(e) => handleChange(null, 'avatarUrl', e.target.value)} className="w-full px-3 py-2 border border-parchment-dark rounded font-serif text-xs" />
               </div>
             </div>
           </div>

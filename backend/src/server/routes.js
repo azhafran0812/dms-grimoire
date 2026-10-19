@@ -38,6 +38,11 @@ export function registerRoutes(app) {
 	app.post("/api/auth/login", asyncWrap(handleLogin));
 	app.post("/api/auth/logout", asyncWrap(handleLogout));
 
+	// ── Character AI & Styling (Proxied to MCP) ──
+	// MUST be registered BEFORE /api/characters/:id to avoid parameter collision
+	app.post("/api/characters/generate-ai", optionalAuthMiddleware, asyncWrap(characterCtrl.handleGenerateCharacterAi));
+	app.post("/api/characters/:id/style", optionalAuthMiddleware, asyncWrap(characterCtrl.handleStyleCharacter));
+
 	// ── Character CRUD (Protected) ──
 	app.post("/api/characters", authMiddleware, asyncWrap(characterCtrl.handleCreate));
 	app.get("/api/characters", authMiddleware, asyncWrap(characterCtrl.handleGetAll));

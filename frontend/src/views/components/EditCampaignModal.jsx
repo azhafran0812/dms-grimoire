@@ -1,31 +1,30 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { X, Map } from 'lucide-react';
 import { updateCampaignStatus } from '../../controllers/campaignController';
 
 export default function EditCampaignModal({ isOpen, onClose, currentData }) {
+  const [prevData, setPrevData] = useState(currentData);
   const [formData, setFormData] = useState({
-    campaignName: '',
-    chapterTitle: '',
-    description: '',
-    progress: 0,
-    locationName: '',
-    locationDesc: ''
+    campaignName: currentData?.campaignName || '',
+    chapterTitle: currentData?.chapterTitle || '',
+    description: currentData?.description || '',
+    progress: currentData?.progress || 0,
+    locationName: currentData?.locationName || '',
+    locationDesc: currentData?.locationDesc || ''
   });
   const [loading, setLoading] = useState(false);
 
-  // Isi form dengan data saat ini jika ada
-  useEffect(() => {
-    if (currentData) {
-      setFormData({
-        campaignName: currentData.campaignName || '',
-        chapterTitle: currentData.chapterTitle || '',
-        description: currentData.description || '',
-        progress: currentData.progress || 0,
-        locationName: currentData.locationName || '',
-        locationDesc: currentData.locationDesc || ''
-      });
-    }
-  }, [currentData, isOpen]);
+  if (currentData !== prevData) {
+    setPrevData(currentData);
+    setFormData({
+      campaignName: currentData?.campaignName || '',
+      chapterTitle: currentData?.chapterTitle || '',
+      description: currentData?.description || '',
+      progress: currentData?.progress || 0,
+      locationName: currentData?.locationName || '',
+      locationDesc: currentData?.locationDesc || ''
+    });
+  }
 
   if (!isOpen) return null;
 

@@ -3,7 +3,8 @@ import { v4 as uuidv4 } from 'uuid';
 export const createCharacterPayload = (basicData) => {
   return {
     id: uuidv4(),
-    playerId: null, // Saat ini null. Nanti akan diisi UID Firebase dari akun Player
+    playerId: null, // Legacy field
+    ownerEmail: basicData.ownerEmail || '', // Email of the player who owns this character
     
     // --- Identitas Dasar ---
     name: basicData.name || "Unknown Hero",

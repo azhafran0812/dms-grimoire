@@ -8,7 +8,8 @@ export default function AddCharacterModal({ isOpen, onClose }) {
     characterClass: 'Fighter',
     race: 'Human',
     hpMax: 10,
-    ac: 15
+    ac: 15,
+    ownerEmail: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -30,17 +31,28 @@ export default function AddCharacterModal({ isOpen, onClose }) {
     setError('');
 
     try {
+      const avatarUrl = `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(formData.name.trim())}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`;
       await addCharacter({
         name: formData.name,
         characterClass: formData.characterClass,
         race: formData.race,
         hpMax: parseInt(formData.hpMax),
         hpCurrent: parseInt(formData.hpMax),
-        ac: parseInt(formData.ac)
+        ac: parseInt(formData.ac),
+        ownerEmail: formData.ownerEmail.trim() || '',
+        avatarUrl,
+        aiMeta: {
+          image: {
+            rendered: true,
+            dataUrl: avatarUrl,
+            dimensions: '256x256',
+            format: 'svg',
+          },
+        },
       });
       
       // Reset form dan tutup modal setelah sukses
-      setFormData({ name: '', characterClass: 'Fighter', race: 'Human', hpMax: 10, ac: 15 });
+      setFormData({ name: '', characterClass: 'Fighter', race: 'Human', hpMax: 10, ac: 15, ownerEmail: '' });
       onClose();
     } catch (err) {
       setError(err.message);
@@ -160,6 +172,24 @@ export default function AddCharacterModal({ isOpen, onClose }) {
                   className="w-full px-4 py-2 bg-white border border-parchment-dark rounded focus:outline-none focus:border-grimoire-gold text-lg font-bold font-serif text-center"
                 />
               </div>
+            </div>
+
+            {/* Player Email (optional - for binding character to player) */}
+            <div className="pt-2 border-t border-parchment-dark">
+              <label className="flex items-center gap-2 text-xs font-bold tracking-widest text-gray-500 uppercase mb-1">
+                Player Email <span className="text-gray-400 normal-case tracking-normal font-normal">(optional — bind to player account)</span>
+              </label>
+              <input 
+                type="email" 
+                name="ownerEmail"
+                placeholder="player@example.com"
+                value={formData.ownerEmail}
+                onChange={handleChange}
+                className="w-full px-4 py-2 bg-white border border-parchment-dark rounded focus:outline-none focus:border-grimoire-gold text-sm"
+              />
+              <p className="text-[10px] text-gray-400 mt-1">
+                If set, this character will appear on that player's dashboard when they log in.
+              </p>
             </div>
 
             {/* Footer Modal / Actions */}

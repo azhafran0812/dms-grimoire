@@ -240,7 +240,7 @@ export default function Overview({ onOpenAddCharacter, onOpenChronicleModal, onO
         </button>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-10">
         {loadingParty ? (
           [1, 2, 3, 4].map((i) => (
             <div key={i} className="bg-white border border-parchment-dark rounded-xl p-5 shadow-sm h-32 animate-pulse"></div>
@@ -255,10 +255,10 @@ export default function Overview({ onOpenAddCharacter, onOpenChronicleModal, onO
       </div>
 
       {/* --- CAMPAIGN CHRONICLE & QUICK PREP SECTION --- */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
         
         {/* Recent Story Timeline */}
-        <div className="lg:col-span-2">
+        <div className="xl:col-span-2">
           <div className="flex items-center justify-between mb-6">
             <div>
               <p className="text-xs text-grimoire-gold font-bold tracking-widest uppercase mb-1">Campaign Chronicle</p>

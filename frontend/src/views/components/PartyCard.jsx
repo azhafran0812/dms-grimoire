@@ -1,10 +1,11 @@
 import { Shield, Minus, Plus, Trash2 } from 'lucide-react';
 import { updateCharacterStat, removeCharacter } from '../../controllers/partyController';
+import GrimoireAvatar from './shared/GrimoireAvatar';
 
 export default function PartyCard({ id, character }) {
-  // Destrukturisasi data dari Firebase
-  const { name, race, characterClass } = character;
-  const { hpMax, hpCurrent, ac } = character.combat;
+  // Destrukturisasi data dari Firebase dengan safe defaults
+  const { name = 'Hero', race = 'Human', characterClass = 'Fighter' } = character || {};
+  const { hpMax = 10, hpCurrent = 10, ac = 10 } = character?.combat || {};
 
   // Hitung persentase untuk progress bar HP
   const hpPercentage = Math.max(0, Math.min(100, (hpCurrent / hpMax) * 100));
@@ -43,11 +44,11 @@ export default function PartyCard({ id, character }) {
       </button>
 
       <div className="flex items-center gap-4 mb-5">
-        <div className="w-12 h-12 bg-grimoire-dark text-parchment flex items-center justify-center rounded-full font-serif text-lg relative">
-          {initials}
-          {/* Status Dot (Hijau jika HP > 0, Merah jika 0) */}
-          <div className={`absolute -top-1 -right-1 w-3.5 h-3.5 border-2 border-white rounded-full ${hpCurrent > 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
-        </div>
+        <GrimoireAvatar
+          entity={character}
+          size="md"
+          statusDot={hpCurrent > 0 ? 'alive' : 'dead'}
+        />
         <div>
           <h4 className="font-serif font-bold text-lg uppercase tracking-wide text-grimoire-dark leading-tight">{name}</h4>
           <p className="text-xs text-gray-500">{race} · {characterClass}</p>

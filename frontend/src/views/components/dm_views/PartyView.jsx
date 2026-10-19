@@ -3,6 +3,7 @@ import { Users, Shield, Heart, Zap, Edit3, Activity } from 'lucide-react';
 import { ref, onValue } from 'firebase/database';
 import { db } from '../../../firebase';
 import EditCharacterModal from '../EditCharacterModal';
+import GrimoireAvatar from '../shared/GrimoireAvatar';
 
 // Fungsi bantuan untuk menghitung modifier D&D (misal: Stat 16 -> +3)
 const getModifier = (score) => {
@@ -50,16 +51,14 @@ export default function PartyView() {
       {loading ? (
         <div className="flex justify-center py-20"><p className="text-gray-400 animate-pulse">Reading the character sheets...</p></div>
       ) : partyMembers.length > 0 ? (
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 2xl:grid-cols-2 gap-8">
           {partyMembers.map((char) => (
             <div key={char.id} className="bg-white border border-parchment-dark rounded-xl shadow-sm overflow-hidden flex flex-col">
               
               {/* Card Header (Identitas Dasar) */}
               <div className="bg-grimoire-dark p-5 text-white flex justify-between items-start">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-parchment text-grimoire-dark flex items-center justify-center rounded-full font-serif text-xl font-bold border-2 border-grimoire-gold">
-                    {char.name.substring(0, 2).toUpperCase()}
-                  </div>
+                  <GrimoireAvatar entity={char} size="lg" className="w-14 h-14" />
                   <div>
                     <h3 className="font-serif font-bold text-2xl uppercase tracking-wide leading-tight">{char.name}</h3>
                     <p className="text-sm text-gray-300">
@@ -108,7 +107,7 @@ export default function PartyView() {
                 </div>
 
                 {/* Main Attributes (Ability Scores) */}
-                <div className="grid grid-cols-6 gap-2">
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                   {[
                     { label: 'STR', value: char.stats?.str || 10 },
                     { label: 'DEX', value: char.stats?.dex || 10 },

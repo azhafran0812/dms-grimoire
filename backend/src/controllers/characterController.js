@@ -75,4 +75,31 @@ export async function handleDelete(req, res) {
 	sendSuccess(res, { deleted: true, id: req.params.id }, { action: "character.delete" });
 }
 
-export default { handleCreate, handleGetAll, handleGetById, handleUpdate, handleUpdateStat, handleDelete };
+/**
+ * POST /api/characters/:id/style — Style character via MCP AI
+ */
+export async function handleStyleCharacter(req, res) {
+	const { prompt, render = true, simulate = false } = req.body || {};
+	const result = await CharacterService.styleCharacter(req.params.id, { prompt, render, simulate });
+	sendSuccess(res, result, { action: "character.style_ai", source: "mcp" });
+}
+
+/**
+ * POST /api/characters/generate-ai — Generate brand new character via MCP AI
+ */
+export async function handleGenerateCharacterAi(req, res) {
+	const { prompt, render = true, simulate = false } = req.body || {};
+	const result = await CharacterService.generateCharacterWithAi({ prompt, render, simulate });
+	sendSuccess(res, result, { action: "character.generate_ai", source: "mcp" }, 201);
+}
+
+export default {
+	handleCreate,
+	handleGetAll,
+	handleGetById,
+	handleUpdate,
+	handleUpdateStat,
+	handleDelete,
+	handleStyleCharacter,
+	handleGenerateCharacterAi,
+};

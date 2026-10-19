@@ -16,7 +16,7 @@ export const addChronicle = async (sessionNumber, title, description) => {
       createdAt: Date.now()
     });
   } catch (error) {
-    throw new Error(`Gagal menambah cerita: ${error.message}`);
+    throw new Error(`Gagal menambah cerita: ${error.message}`, { cause: error });
   }
 };
 
@@ -26,6 +26,6 @@ export const deleteChronicle = async (id) => {
     const entryRef = ref(db, `${chroniclePath}/${id}`);
     await remove(entryRef);
   } catch (error) {
-    throw new Error(`Gagal menghapus cerita: ${error.message}`);
+    throw new Error(`Gagal menghapus cerita: ${error.message}`, { cause: error });
   }
 };

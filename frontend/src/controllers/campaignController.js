@@ -8,6 +8,6 @@ export const updateCampaignStatus = async (updateData) => {
     const campaignRef = ref(db, campaignPath);
     await update(campaignRef, updateData);
   } catch (error) {
-    throw new Error(`Gagal update status kampanye: ${error.message}`);
+    throw new Error(`Gagal update status kampanye: ${error.message}`, { cause: error });
   }
 };
