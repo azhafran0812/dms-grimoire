@@ -8,7 +8,7 @@ import { ref, onValue, set, update, remove, push } from 'firebase/database';
 import { db } from '../../../firebase';
 import GrimoireAvatar from '../shared/GrimoireAvatar';
 
-export default function InventoryView({ activeChar = null, partyMembers = [], isDmPreview = false }) {
+export default function InventoryView({ activeChar = null, partyMembers = [], isDmPreview = false, activeCampaignId = null }) {
   // Navigation: 'personal' | 'shared'
   const [activeTab, setActiveTab] = useState('personal');
 
@@ -45,7 +45,8 @@ export default function InventoryView({ activeChar = null, partyMembers = [], is
       setAllHeroes(partyMembers);
       if (!selectedHeroId) setSelectedHeroId(activeChar?.id || partyMembers[0].id);
     } else {
-      const partyRef = ref(db, 'party');
+      const partyPath = activeCampaignId ? `campaigns/${activeCampaignId}/party` : 'party';
+      const partyRef = ref(db, partyPath);
       const unsubParty = onValue(partyRef, (snap) => {
         if (snap.exists()) {
           const list = Object.entries(snap.val()).map(([id, val]) => ({ id, ...val }));
@@ -57,7 +58,7 @@ export default function InventoryView({ activeChar = null, partyMembers = [], is
       });
       return () => unsubParty();
     }
-  }, [partyMembers, activeChar]);
+  }, [partyMembers, activeChar, activeCampaignId]);
 
   // Update selectedHeroId when activeChar prop changes
   useEffect(() => {

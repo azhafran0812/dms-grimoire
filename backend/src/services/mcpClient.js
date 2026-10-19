@@ -10,7 +10,7 @@
 import { config } from "../config/env.js";
 import { AppError, ErrorCode } from "../io/AppError.js";
 
-const MCP_TIMEOUT_MS = 60000; // 60s — AI generation can be slow
+const MCP_TIMEOUT_MS = 180000; // 60s — AI generation can be slow
 
 /**
  * Calls the MCP /api/generate-npc endpoint to generate an NPC via AI.

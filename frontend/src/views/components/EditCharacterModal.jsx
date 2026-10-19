@@ -1,21 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, UserCog } from 'lucide-react';
 import { updateFullCharacter } from '../../controllers/partyController';
 import GrimoireAvatar from './shared/GrimoireAvatar';
 
-export default function EditCharacterModal({ isOpen, onClose, characterData }) {
-  const [prevChar, setPrevChar] = useState(characterData);
-  const [formData, setFormData] = useState(() => (characterData ? JSON.parse(JSON.stringify(characterData)) : null));
+export default function EditCharacterModal({ isOpen, onClose, characterData, activeCampaignId }) {
+  const [formData, setFormData] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  if (characterData !== prevChar) {
-    setPrevChar(characterData);
-    setFormData(characterData ? JSON.parse(JSON.stringify(characterData)) : null);
-  }
+  useEffect(() => {
+    if (characterData && isOpen) {
+      setFormData(JSON.parse(JSON.stringify(characterData)));
+    }
+  }, [characterData, isOpen]);
 
   if (!isOpen || !formData) return null;
 
-  // Fungsi helper untuk handle perubahan input nested (seperti stats.str atau combat.hpCurrent)
   const handleChange = (category, field, value) => {
     setFormData(prev => {
       if (category) {
@@ -27,12 +26,17 @@ export default function EditCharacterModal({ isOpen, onClose, characterData }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setLoading(true);
     try {
-      await updateFullCharacter(characterData.id, formData);
+      if (activeCampaignId) {
+        await updateFullCharacter(activeCampaignId, characterData.id, formData);
+      } else {
+        await updateFullCharacter(characterData.id, formData);
+      }
       onClose();
     } catch (error) {
-      console.error(error);
+      console.error("Error saving character edit:", error);
     } finally {
       setLoading(false);
     }
@@ -53,7 +57,6 @@ export default function EditCharacterModal({ isOpen, onClose, characterData }) {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-8">
-          
           {/* BAGIAN 1: Basic Info */}
           <div>
             <h3 className="text-sm font-bold text-grimoire-gold tracking-widest uppercase mb-4 border-b border-parchment-dark pb-2">Basic Info</h3>
