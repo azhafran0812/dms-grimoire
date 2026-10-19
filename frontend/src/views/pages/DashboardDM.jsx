@@ -21,8 +21,10 @@ import { sendEmailVerification } from 'firebase/auth';
 import { AlertTriangle, Mail } from 'lucide-react';
 
 export default function DashboardDM() {
-  // --- STATE NAVIGASI ---
+  // --- STATE NAVIGASI UTAMA ---
   const [activeView, setActiveView] = useState('overview'); 
+  // STATE INI SANGAT PENTING: Untuk melacak ID kampanye yang sedang dibuka
+  const [activeCampaignId, setActiveCampaignId] = useState(null); 
 
   // --- STATE MODALS ---
   const [isScribeOpen, setIsScribeOpen] = useState(false);
@@ -92,10 +94,13 @@ export default function DashboardDM() {
 
         <main className="flex-1 overflow-y-auto overflow-x-hidden p-6 lg:p-8">
           
-          {/* --- CONDITIONAL RENDERING BERDASARKAN MENU SIDEBAR --- */}
+          {/* --- CONDITIONAL RENDERING --- */}
           
           {activeView === 'overview' && (
             <Overview 
+              activeCampaignId={activeCampaignId}
+              setActiveCampaignId={setActiveCampaignId}
+              setActiveView={setActiveView}
               onOpenAddCharacter={() => setIsAddCharacterOpen(true)}
               onOpenChronicleModal={() => setIsChronicleModalOpen(true)}
               onOpenCampaignModal={() => setIsCampaignModalOpen(true)}
@@ -107,30 +112,31 @@ export default function DashboardDM() {
           )}
 
           {activeView === 'party' && (
-            <PartyView />
+            <PartyView activeCampaignId={activeCampaignId} />
           )}
 
           {activeView === 'lore' && (
             <LoreView 
+              activeCampaignId={activeCampaignId} 
               onOpenAddLore={() => setIsAddLoreOpen(true)}
               onOpenChronicleModal={() => setIsChronicleModalOpen(true)}
             />
           )}
 
           {activeView === 'npcs' && (
-            <NpcView onOpenScribe={() => setIsScribeOpen(true)} />
+            <NpcView activeCampaignId={activeCampaignId} onOpenScribe={() => setIsScribeOpen(true)} />
           )}
 
           {activeView === 'inventory' && (
-            <InventoryView />
+            <InventoryView activeCampaignId={activeCampaignId} />
           )}
 
           {activeView === 'notes' && (
-            <NotesView />
+            <NotesView activeCampaignId={activeCampaignId} />
           )}
 
           {activeView === 'schedule' && (
-            <ScheduleView />
+            <ScheduleView activeCampaignId={activeCampaignId} />
           )}
 
         </main>
@@ -141,28 +147,31 @@ export default function DashboardDM() {
       <ArcaneScribeModal 
         isOpen={isScribeOpen} 
         onClose={() => setIsScribeOpen(false)} 
-        campaignName="The Ashen Crown" 
+        campaignName="DM's Grimoire" 
       />
       
       <AddCharacterModal 
         isOpen={isAddCharacterOpen} 
         onClose={() => setIsAddCharacterOpen(false)} 
+        activeCampaignId={activeCampaignId}
       />
       
       <AddChronicleModal 
         isOpen={isChronicleModalOpen} 
         onClose={() => setIsChronicleModalOpen(false)} 
+        activeCampaignId={activeCampaignId}
       />
       
       <EditCampaignModal 
         isOpen={isCampaignModalOpen} 
         onClose={() => setIsCampaignModalOpen(false)} 
-        currentData={{}} 
+        activeCampaignId={activeCampaignId}
       />
 
       <AddLoreModal 
         isOpen={isAddLoreOpen} 
         onClose={() => setIsAddLoreOpen(false)} 
+        activeCampaignId={activeCampaignId}
       />
 
     </div>

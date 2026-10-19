@@ -5,7 +5,7 @@ import { db } from '../../../firebase';
 import { updateSchedule, updatePlayerRsvp, defaultSchedule } from '../../../controllers/scheduleController';
 import GrimoireAvatar from '../shared/GrimoireAvatar';
 
-export default function ScheduleView() {
+export default function ScheduleView({ activeCampaignId }) {
   const [schedule, setSchedule] = useState(defaultSchedule);
   const [partyMembers, setPartyMembers] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
@@ -14,7 +14,8 @@ export default function ScheduleView() {
 
   // Fetch Schedule & Party from Firebase
   useEffect(() => {
-    const schedRef = ref(db, 'campaign/active/schedule');
+    const schedPath = activeCampaignId ? `campaigns/${activeCampaignId}/schedule` : 'campaign/active/schedule';
+    const schedRef = ref(db, schedPath);
     const unsubSched = onValue(schedRef, (snapshot) => {
       if (snapshot.exists()) {
         const val = snapshot.val();
@@ -27,7 +28,8 @@ export default function ScheduleView() {
       }
     });
 
-    const partyRef = ref(db, 'party');
+    const partyPath = activeCampaignId ? `campaigns/${activeCampaignId}/party` : 'party';
+    const partyRef = ref(db, partyPath);
     const unsubParty = onValue(partyRef, (snapshot) => {
       if (snapshot.exists()) {
         setPartyMembers(Object.values(snapshot.val()));
@@ -40,7 +42,7 @@ export default function ScheduleView() {
       unsubSched();
       unsubParty();
     };
-  }, []);
+  }, [activeCampaignId]);
 
   // Live countdown calculation
   useEffect(() => {

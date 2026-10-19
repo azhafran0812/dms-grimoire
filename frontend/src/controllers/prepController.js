@@ -1,37 +1,88 @@
+import { ref, push, set, update, remove } from 'firebase/database';
 import { db } from '../firebase';
-import { ref, set, update, remove, push } from 'firebase/database';
 
-const prepPath = 'quickPrep';
+const getPrepPath = (campaignId) => campaignId ? `campaigns/${campaignId}/quickPrep` : 'prepList';
 
-export const addPrepItem = async (text) => {
+// Tambah item prep ke kampanye spesifik
+export const addPrepItem = async (arg1, arg2) => {
+  let campaignId = null;
+  let text = '';
+  if (arg2 !== undefined) {
+    campaignId = arg1;
+    text = arg2;
+  } else {
+    text = arg1;
+  }
+
+  if (!text || !text.trim()) return;
+
   try {
-    const prepRef = ref(db, prepPath);
+    const path = getPrepPath(campaignId);
+    const prepRef = ref(db, path);
     const newItemRef = push(prepRef);
-    await set(newItemRef, {
+    const item = {
       id: newItemRef.key,
-      text: text,
+      text: text.trim(),
       isCompleted: false,
       createdAt: Date.now()
-    });
+    };
+    await set(newItemRef, item);
+    return item;
   } catch (error) {
+    console.error("Error adding prep item: ", error);
     throw new Error(`Gagal menambah prep item: ${error.message}`, { cause: error });
   }
 };
 
-export const togglePrepItem = async (itemId, currentStatus) => {
+// Toggle status selesai/belum selesai
+export const togglePrepItem = async (arg1, arg2, arg3) => {
+  let campaignId = null;
+  let itemId = null;
+  let currentStatus = false;
+
+  if (arg3 !== undefined) {
+    campaignId = arg1;
+    itemId = arg2;
+    currentStatus = arg3;
+  } else {
+    itemId = arg1;
+    currentStatus = arg2;
+  }
+
+  if (!itemId) return;
+
   try {
-    const itemRef = ref(db, `${prepPath}/${itemId}`);
-    await update(itemRef, { isCompleted: !currentStatus });
+    const path = getPrepPath(campaignId);
+    const itemRef = ref(db, `${path}/${itemId}`);
+    await update(itemRef, {
+      isCompleted: !currentStatus
+    });
   } catch (error) {
+    console.error("Error toggling prep item: ", error);
     throw new Error(`Gagal update status: ${error.message}`, { cause: error });
   }
 };
 
-export const deletePrepItem = async (itemId) => {
+// Hapus item prep
+export const deletePrepItem = async (arg1, arg2) => {
+  let campaignId = null;
+  let itemId = null;
+
+  if (arg2 !== undefined) {
+    campaignId = arg1;
+    itemId = arg2;
+  } else {
+    itemId = arg1;
+  }
+
+  if (!itemId) return;
+
   try {
-    const itemRef = ref(db, `${prepPath}/${itemId}`);
+    const path = getPrepPath(campaignId);
+    const itemRef = ref(db, `${path}/${itemId}`);
     await remove(itemRef);
   } catch (error) {
+    console.error("Error deleting prep item: ", error);
     throw new Error(`Gagal menghapus item: ${error.message}`, { cause: error });
   }
 };

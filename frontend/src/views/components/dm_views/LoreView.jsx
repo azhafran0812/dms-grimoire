@@ -5,7 +5,7 @@ import { db } from '../../../firebase';
 import { deleteLore } from '../../../controllers/loreController';
 import { deleteChronicle } from '../../../controllers/chronicleController';
 
-export default function LoreView({ onOpenAddLore, onOpenChronicleModal }) {
+export default function LoreView({ onOpenAddLore, onOpenChronicleModal, activeCampaignId }) {
   const [activeTab, setActiveTab] = useState('lore'); // 'lore' | 'chronicles'
   const [lores, setLores] = useState([]);
   const [chronicles, setChronicles] = useState([]);
@@ -15,7 +15,8 @@ export default function LoreView({ onOpenAddLore, onOpenChronicleModal }) {
 
   useEffect(() => {
     // 1. Lore Listener
-    const loreRef = ref(db, 'campaign/active/lore');
+    const lorePath = activeCampaignId ? `campaigns/${activeCampaignId}/lore` : 'campaign/active/lore';
+    const loreRef = ref(db, lorePath);
     const unsubLore = onValue(loreRef, (snapshot) => {
       if (snapshot.exists()) {
         const loreArray = Object.entries(snapshot.val()).map(([id, val]) => ({
@@ -29,8 +30,9 @@ export default function LoreView({ onOpenAddLore, onOpenChronicleModal }) {
       setLoading(false);
     });
 
-    // 2. Chronicles Listener (Synced with Player & Overview)
-    const chronRef = ref(db, 'chronicles');
+    // 2. Chronicles Listener (Synced with Campaign, Player & Overview)
+    const chronPath = activeCampaignId ? `campaigns/${activeCampaignId}/chronicles` : 'chronicles';
+    const chronRef = ref(db, chronPath);
     const unsubChron = onValue(chronRef, (snapshot) => {
       if (snapshot.exists()) {
         const chronArray = Object.entries(snapshot.val()).map(([id, val]) => ({
@@ -47,7 +49,7 @@ export default function LoreView({ onOpenAddLore, onOpenChronicleModal }) {
       unsubLore();
       unsubChron();
     };
-  }, []);
+  }, [activeCampaignId]);
 
   const getCategoryIcon = (category) => {
     if (category === 'Location') return <MapIcon className="w-4 h-4 text-blue-600" />;

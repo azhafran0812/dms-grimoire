@@ -7,11 +7,14 @@ import AddNpcModal from '../AddNpcModal';
 import EditNpcModal from '../EditNpcModal';
 import GrimoireAvatar from '../shared/GrimoireAvatar';
 
-export default function NpcView({ onOpenScribe }) {
+export default function NpcView({ onOpenScribe, activeCampaignId }) {
   const [npcs, setNpcs] = useState([]);
+  const [expandedId, setExpandedId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDisposition, setFilterDisposition] = useState('All');
   const [loading, setLoading] = useState(true);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedNpcToEdit, setSelectedNpcToEdit] = useState(null);
 
   // Modals state
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -19,7 +22,8 @@ export default function NpcView({ onOpenScribe }) {
   const [isEditOpen, setIsEditOpen] = useState(false);
 
   useEffect(() => {
-    const npcRef = ref(db, 'campaign/active/npcs');
+    const targetPath = activeCampaignId ? `campaigns/${activeCampaignId}/npcs` : 'campaign/active/npcs';
+    const npcRef = ref(db, targetPath);
     const unsubNpc = onValue(npcRef, (snapshot) => {
       if (snapshot.exists()) {
         const npcArray = Object.entries(snapshot.val()).map(([id, val]) => ({
@@ -34,7 +38,7 @@ export default function NpcView({ onOpenScribe }) {
     });
 
     return () => unsubNpc();
-  }, []);
+  }, [activeCampaignId]);
 
   const handleEditClick = (npc) => {
     setSelectedNpc(npc);
@@ -166,18 +170,26 @@ export default function NpcView({ onOpenScribe }) {
             <div key={npc.id} className="bg-white border border-parchment-dark rounded-xl p-5 shadow-sm relative group hover:border-grimoire-gold transition-colors flex flex-col h-full">
               
               {/* Action buttons (Edit & Delete) */}
-              <div className="absolute top-4 right-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute top-4 right-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                 <button 
-                  onClick={() => handleEditClick(npc)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEditClick(npc);
+                  }}
                   title="Edit NPC"
-                  className="text-gray-400 hover:text-grimoire-dark transition-colors"
+                  className="text-gray-400 hover:text-grimoire-dark transition-colors bg-white/80 rounded-full p-1 shadow-sm"
                 >
                   <Edit3 className="w-4 h-4" />
                 </button>
                 <button 
-                  onClick={() => { if(window.confirm(`Hapus ${npc.name} dari catatan grimoire?`)) deleteNpc(npc.id) }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (window.confirm(`Hapus ${npc.name} dari catatan grimoire?`)) {
+                      deleteNpc(npc.id, activeCampaignId);
+                    }
+                  }}
                   title="Hapus NPC"
-                  className="text-gray-400 hover:text-red-500 transition-colors"
+                  className="text-gray-400 hover:text-red-500 transition-colors bg-white/80 rounded-full p-1 shadow-sm"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -205,9 +217,17 @@ export default function NpcView({ onOpenScribe }) {
 
               {/* Description */}
               {npc.description && (
-                <p className="text-sm text-gray-600 line-clamp-3 flex-1 mb-3 italic">
-                  "{npc.description}"
-                </p>
+                <div 
+                  className="mb-3 flex-1 cursor-pointer group/desc relative"
+                  onClick={() => setExpandedId(expandedId === npc.id ? null : npc.id)}
+                >
+                  <p className={`text-sm text-gray-600 transition-all duration-300 italic ${expandedId === npc.id ? '' : 'line-clamp-3'}`}>
+                    "{npc.description}"
+                  </p>
+                  <p className="text-[10px] font-semibold text-grimoire-gold mt-1 opacity-0 group-hover/desc:opacity-100 transition-opacity">
+                    {expandedId === npc.id ? 'Tutup deskripsi' : 'Baca selengkapnya...'}
+                  </p>
+                </div>
               )}
 
               {/* Traits */}
@@ -224,7 +244,6 @@ export default function NpcView({ onOpenScribe }) {
                   <p className="line-clamp-2"><span className="font-bold">Secret:</span> {npc.secret}</p>
                 </div>
               )}
-
             </div>
           ))}
         </div>
@@ -251,17 +270,21 @@ export default function NpcView({ onOpenScribe }) {
           </div>
         </div>
       )}
-
       {/* Modals */}
       <AddNpcModal 
         isOpen={isAddOpen}
         onClose={() => setIsAddOpen(false)}
+        activeCampaignId={activeCampaignId}
       />
 
       <EditNpcModal 
         isOpen={isEditOpen}
-        onClose={() => setIsEditOpen(false)}
+        onClose={() => {
+          setIsEditOpen(false);
+          setSelectedNpc(null);
+        }}
         npcData={selectedNpc}
+        activeCampaignId={activeCampaignId}
       />
     </div>
   );

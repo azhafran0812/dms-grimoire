@@ -1,34 +1,34 @@
-import { useState } from 'react';
-import { X, UserCheck, MapPin, Lock } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, MapPin, Lock } from 'lucide-react';
 import { updateNpc } from '../../controllers/npcController';
 import GrimoireAvatar from './shared/GrimoireAvatar';
 
-export default function EditNpcModal({ isOpen, onClose, npcData }) {
-  const [prevNpc, setPrevNpc] = useState(npcData);
+export default function EditNpcModal({ isOpen, onClose, npcData, activeCampaignId }) {
   const [formData, setFormData] = useState({
-    name: npcData?.name || '',
-    role: npcData?.role || '',
-    location: npcData?.location || '',
-    disposition: npcData?.disposition || 'Neutral',
-    traits: npcData?.traits || '',
-    description: npcData?.description || '',
-    secret: npcData?.secret || ''
+    name: '',
+    role: '',
+    location: '',
+    disposition: 'Neutral',
+    traits: '',
+    description: '',
+    secret: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  if (npcData !== prevNpc) {
-    setPrevNpc(npcData);
-    setFormData({
-      name: npcData?.name || '',
-      role: npcData?.role || '',
-      location: npcData?.location || '',
-      disposition: npcData?.disposition || 'Neutral',
-      traits: npcData?.traits || '',
-      description: npcData?.description || '',
-      secret: npcData?.secret || ''
-    });
-  }
+  useEffect(() => {
+    if (npcData && isOpen) {
+      setFormData({
+        name: npcData.name || '',
+        role: npcData.role || '',
+        location: npcData.location || '',
+        disposition: npcData.disposition || 'Neutral',
+        traits: npcData.traits || '',
+        description: npcData.description || npcData.content || '',
+        secret: npcData.secret || ''
+      });
+    }
+  }, [npcData, isOpen]);
 
   if (!isOpen || !npcData) return null;
 
@@ -46,7 +46,7 @@ export default function EditNpcModal({ isOpen, onClose, npcData }) {
     setError('');
 
     try {
-      await updateNpc(npcData.id, formData);
+      await updateNpc(npcData.id, formData, activeCampaignId);
       onClose();
     } catch (err) {
       setError(err.message);

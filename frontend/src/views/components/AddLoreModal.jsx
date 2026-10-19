@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { X, Scroll } from 'lucide-react';
 import { addLore } from '../../controllers/loreController';
 
-export default function AddLoreModal({ isOpen, onClose }) {
+export default function AddLoreModal({ isOpen, onClose, activeCampaignId }) {
   const [formData, setFormData] = useState({ title: '', category: 'Location', content: '' });
   const [loading, setLoading] = useState(false);
 
@@ -12,7 +12,7 @@ export default function AddLoreModal({ isOpen, onClose }) {
     e.preventDefault();
     setLoading(true);
     try {
-      await addLore(formData);
+      await addLore(formData, activeCampaignId);
       setFormData({ title: '', category: 'Location', content: '' });
       onClose();
     } catch (error) {

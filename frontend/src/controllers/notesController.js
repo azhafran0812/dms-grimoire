@@ -1,11 +1,12 @@
 import { db } from '../firebase';
 import { ref, set, update, remove, push } from 'firebase/database';
 
-const notesPath = 'campaign/active/notes';
+const getNotesPath = (campaignId) => campaignId ? `campaigns/${campaignId}/notes` : 'campaign/active/notes';
 
-export const addNote = async (noteData) => {
+export const addNote = async (noteData, campaignId = null) => {
   try {
-    const notesRef = ref(db, notesPath);
+    const targetPath = getNotesPath(campaignId || noteData?.campaignId);
+    const notesRef = ref(db, targetPath);
     const newNoteRef = push(notesRef);
     const id = newNoteRef.key;
     const entry = {
@@ -25,9 +26,10 @@ export const addNote = async (noteData) => {
   }
 };
 
-export const updateNote = async (id, noteData) => {
+export const updateNote = async (id, noteData, campaignId = null) => {
   try {
-    const noteRef = ref(db, `${notesPath}/${id}`);
+    const targetPath = getNotesPath(campaignId || noteData?.campaignId);
+    const noteRef = ref(db, `${targetPath}/${id}`);
     await update(noteRef, {
       ...noteData,
       updatedAt: Date.now()
@@ -37,9 +39,10 @@ export const updateNote = async (id, noteData) => {
   }
 };
 
-export const togglePinNote = async (id, currentPinned) => {
+export const togglePinNote = async (id, currentPinned, campaignId = null) => {
   try {
-    const noteRef = ref(db, `${notesPath}/${id}`);
+    const targetPath = getNotesPath(campaignId);
+    const noteRef = ref(db, `${targetPath}/${id}`);
     await update(noteRef, {
       isPinned: !currentPinned,
       updatedAt: Date.now()
@@ -49,9 +52,10 @@ export const togglePinNote = async (id, currentPinned) => {
   }
 };
 
-export const deleteNote = async (id) => {
+export const deleteNote = async (id, campaignId = null) => {
   try {
-    const noteRef = ref(db, `${notesPath}/${id}`);
+    const targetPath = getNotesPath(campaignId);
+    const noteRef = ref(db, `${targetPath}/${id}`);
     await remove(noteRef);
   } catch (error) {
     throw new Error(`Gagal menghapus catatan: ${error.message}`, { cause: error });
